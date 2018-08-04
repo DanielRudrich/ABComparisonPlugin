@@ -8,6 +8,11 @@
   ==============================================================================
 */
 
+/*
+ ===== TODOs =====
+    - implement exclusive solo
+ */
+
 #pragma once
 
 #define nChoices 5
@@ -61,6 +66,11 @@ public:
 
 private:
     AudioProcessorValueTreeState parameters;
+    LinearSmoothedValue<float> gains[nChoices];
+
+    float *choiceMode;
+    float *fadeTime;
+    float *choiceStates[nChoices];
 
 
     //==============================================================================

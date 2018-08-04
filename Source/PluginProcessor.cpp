@@ -64,8 +64,13 @@ parameters (*this, nullptr)
     for (int choice = 0; choice < nChoices; ++choice)
     {
         parameters.addParameterListener ("choiceState" + String(choice), this);
+        choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + String(choice));
     }
-    
+
+    parameters.addParameterListener ("fadeTime", this);
+    choiceMode = parameters.getRawParameterValue ("choiceMode");
+    fadeTime = parameters.getRawParameterValue ("fadeTime");
+
 }
 
 
@@ -138,8 +143,11 @@ void AbcomparisonAudioProcessor::changeProgramName (int index, const String& new
 //==============================================================================
 void AbcomparisonAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    for (int choice = 0; choice < nChoices; ++choice)
+    {
+        gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
+        gains[choice].setValue (*choiceStates[choice] < 0.5f ? 0.0f : 1.0f, true);
+    }
 }
 
 void AbcomparisonAudioProcessor::releaseResources()
@@ -158,30 +166,48 @@ bool AbcomparisonAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    auto nCh = buffer.getNumChannels();
+    const int stride = *parameters.getRawParameterValue("channelSize") + 1;
+    auto nSamples = buffer.getNumSamples();
+    // choice 0
+    if (! gains[0].isSmoothing() && gains[0].getTargetValue() == 0.0f)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+        for (int ch = 0; ch < jmin(nCh, stride); ++ch)
+            buffer.clear(ch, 0, nSamples);
     }
+    else
+    {
+        const float startGain = gains[0].getNextValue();
+        gains[0].skip (nSamples - 2);
+        const float endGain = gains[0].getNextValue();
+
+        for (int ch = 0; ch < jmin(nCh, stride); ++ch)
+            buffer.applyGainRamp(ch, 0, nSamples, startGain, endGain);
+    }
+
+    // remaining choices
+
+    for (int choice = 1; choice < nChoices; ++choice)
+    {
+        if (gains[choice].isSmoothing() || gains[choice].getTargetValue() != 0.0f)
+        {
+            const float startGain = gains[choice].getNextValue();
+            gains[choice].skip (nSamples - 2);
+            const float endGain = gains[choice].getNextValue();
+
+            for (int ch = 0; ch < stride; ++ch)
+            {
+                const int sourceChannel = choice * stride + ch;
+                if (sourceChannel < nCh)
+                    buffer.addFromWithRamp (ch, 0, buffer.getReadPointer (sourceChannel), nSamples, startGain, endGain);
+            }
+        }
+    }
+
+    // clear not needed channels
+    for (int ch = stride; ch < nCh; ++ch)
+        buffer.clear(ch, 0, nSamples);
+
 }
 
 //==============================================================================
@@ -213,7 +239,17 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
 
 void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, float newValue)
 {
-
+    if (parameterID.startsWith("choiceState"))
+    {
+        auto choice = parameterID.substring(11).getIntValue();
+        gains[choice].setValue (newValue);
+    }
+    else if (parameterID == "fadeTime")
+    {
+        auto sampleRate = getSampleRate();
+        for (int choice = 0; choice < nChoices; ++choice)
+            gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
+    }
 }
 
 //==============================================================================
