@@ -31,12 +31,12 @@ parameters (*this, nullptr)
                                       [](float value)
                                       {
                                           if (value < 0.5f ) return "Exclusive Solo";
-                                          else return "ON/OFF mode";
+                                          else return "Toggle Mode";
                                       },
                                       nullptr);
 
-    parameters.createAndAddParameter ("channelSize", "Output Channel Size", "channel(s)",
-                                      NormalisableRange<float> (1.0f, 32, 1.0f), 2.0f,
+    parameters.createAndAddParameter ("channelSize", "Output Channel Size", "channel(s)", // has an offset of 1!
+                                      NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo
                                       [](float value) { return String (value); },
                                       nullptr);
 

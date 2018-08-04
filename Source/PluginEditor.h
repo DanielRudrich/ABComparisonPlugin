@@ -13,6 +13,11 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
+
+typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
+typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
+
 //==============================================================================
 /**
 */
@@ -32,5 +37,15 @@ private:
     AbcomparisonAudioProcessor& processor;
     AudioProcessorValueTreeState& parameters;
 
+    ComboBox cbSwitchMode;
+    ComboBox cbChannelSize;
+    Slider slFadeTime;
+
+    ScopedPointer<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment;
+    ScopedPointer<SliderAttachment> slFadeTimeAttachment;
+
+    OwnedArray<TextButton> tbChoice;
+    OwnedArray<ButtonAttachment> tbChoiceAttachments;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
 };
