@@ -10,12 +10,14 @@
 
 #pragma once
 
+#define nChoices 5
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessor  : public AudioProcessor
+class AbcomparisonAudioProcessor  : public AudioProcessor, private AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -55,7 +57,12 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    void parameterChanged (const String &parameterID, float newValue) override;
+
 private:
+    AudioProcessorValueTreeState parameters;
+
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessor)
 };

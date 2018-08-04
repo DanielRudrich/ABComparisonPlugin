@@ -17,14 +17,57 @@ AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
+                       .withInput  ("Input",  AudioChannelSet::discreteChannels (64), true)
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
+parameters (*this, nullptr)
 {
+
+    parameters.createAndAddParameter ("switchMode", "Switch mode", "",
+                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                      [](float value)
+                                      {
+                                          if (value < 0.5f ) return "Exclusive Solo";
+                                          else return "ON/OFF mode";
+                                      },
+                                      nullptr);
+
+    parameters.createAndAddParameter ("channelSize", "Output Channel Size", "channel(s)",
+                                      NormalisableRange<float> (1.0f, 32, 1.0f), 2.0f,
+                                      [](float value) { return String (value); },
+                                      nullptr);
+
+    parameters.createAndAddParameter ("fadeTime", "Fade-Length", "ms",
+                                      NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
+                                      [](float value) { return String (value); },
+                                      nullptr);
+
+
+    for (int choice = 0; choice < nChoices; ++choice)
+    {
+        parameters.createAndAddParameter ("choiceState" + String(choice), "Choice " + String::charToString(char ('A' + choice)), "",
+                                          NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                          [](float value)
+                                          {
+                                              if (value >= 0.5f ) return "ON";
+                                              else return "OFF";
+                                          },
+                                          nullptr);
+    }
+
+    parameters.state = ValueTree("ABComparison");
+
+
+    for (int choice = 0; choice < nChoices; ++choice)
+    {
+        parameters.addParameterListener ("choiceState" + String(choice), this);
+    }
+    
 }
+
 
 AbcomparisonAudioProcessor::~AbcomparisonAudioProcessor()
 {
@@ -108,24 +151,7 @@ void AbcomparisonAudioProcessor::releaseResources()
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool AbcomparisonAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
     return true;
-  #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
-        return false;
-
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
-        return false;
-   #endif
-
-    return true;
-  #endif
 }
 #endif
 
@@ -166,21 +192,28 @@ bool AbcomparisonAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* AbcomparisonAudioProcessor::createEditor()
 {
-    return new AbcomparisonAudioProcessorEditor (*this);
+    return new AbcomparisonAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================
 void AbcomparisonAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    auto state = parameters.copyState();
+    std::unique_ptr<XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void AbcomparisonAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (parameters.state.getType()))
+            parameters.replaceState (ValueTree::fromXml (*xmlState));
+}
+
+void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, float newValue)
+{
+
 }
 
 //==============================================================================

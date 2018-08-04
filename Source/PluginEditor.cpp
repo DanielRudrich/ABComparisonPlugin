@@ -12,8 +12,8 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p, AudioProcessorValueTreeState& vts)
+    : AudioProcessorEditor (&p), processor (p), parameters (vts)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
