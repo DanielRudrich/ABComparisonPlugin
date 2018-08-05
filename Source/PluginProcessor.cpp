@@ -68,7 +68,7 @@ parameters (*this, nullptr)
     }
 
     parameters.addParameterListener ("fadeTime", this);
-    choiceMode = parameters.getRawParameterValue ("choiceMode");
+    switchMode = parameters.getRawParameterValue ("switchMode");
     fadeTime = parameters.getRawParameterValue ("fadeTime");
 
 }
@@ -243,6 +243,10 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
     {
         auto choice = parameterID.substring(11).getIntValue();
         gains[choice].setValue (newValue);
+        if (*switchMode < 0.5f && ! mutingOtherChoices) // exclusive solo
+        {
+            muteAllOtherChoices (choice);
+        }
     }
     else if (parameterID == "fadeTime")
     {
@@ -250,6 +254,15 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
         for (int choice = 0; choice < nChoices; ++choice)
             gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
     }
+}
+
+void AbcomparisonAudioProcessor::muteAllOtherChoices (const int choiceNotToMute)
+{
+    ScopedValueSetter<bool> muting (mutingOtherChoices, true);
+
+    for (int i = 0; i < nChoices; ++i)
+        if (i != choiceNotToMute)
+            parameters.getParameter ("choiceState" + String (i))->setValue (0.0f);
 }
 
 //==============================================================================

@@ -10,7 +10,7 @@
 
 /*
  ===== TODOs =====
-    - implement exclusive solo
+    - simple MIDI interface?
  */
 
 #pragma once
@@ -63,15 +63,17 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     void parameterChanged (const String &parameterID, float newValue) override;
+    void muteAllOtherChoices (const int choiceNotToMute);
 
 private:
     AudioProcessorValueTreeState parameters;
     LinearSmoothedValue<float> gains[nChoices];
 
-    float *choiceMode;
+    float *switchMode;
     float *fadeTime;
     float *choiceStates[nChoices];
 
+    bool mutingOtherChoices = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessor)
