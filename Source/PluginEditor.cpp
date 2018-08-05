@@ -15,6 +15,15 @@
 AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p, AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), processor (p), parameters (vts)
 {
+    toolTipWin.setMillisecondsBeforeTipAppears (200);
+    toolTipWin.setOpaque (false);
+    // create a set of colours
+    Array<Colour> cols;
+    cols.add (Colours::limegreen);
+    cols.add (Colours::orange);
+    cols.add (Colours::orangered);
+    cols.add (Colours::slateblue);
+    cols.add (Colours::magenta);
 
     addAndMakeVisible (cbSwitchMode);
     cbSwitchMode.addSectionHeading("Switch Mode");
@@ -36,6 +45,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 
     addAndMakeVisible (slFadeTime);
     slFadeTimeAttachment = new SliderAttachment (parameters, "fadeTime", slFadeTime);
+    slFadeTime.setTooltip ("Cross-fade time (in ms)");
 
     for (int choice = 0; choice < nChoices; ++choice)
     {
@@ -44,11 +54,11 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
         tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + String(choice), *handle));
         handle->setClickingTogglesState (true);
         handle->setButtonText (String::charToString(char ('A' + choice)));
-        handle->setColour (TextButton::buttonOnColourId, Colours::limegreen);
+        handle->setColour (TextButton::buttonOnColourId, cols[choice % cols.size()]);
     }
 
-
-    setSize (800, 300);
+    // set the size of the GUI so the number of choices (nChoices) will fit in there
+    setSize (680, 300);
 }
 
 AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()

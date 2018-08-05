@@ -46,6 +46,8 @@ private:
 
     OwnedArray<TextButton> tbChoice;
     OwnedArray<ButtonAttachment> tbChoiceAttachments;
+
+    TooltipWindow toolTipWin;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
 };
