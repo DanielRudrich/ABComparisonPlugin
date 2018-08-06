@@ -21,7 +21,7 @@ typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor
+class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor, public KeyListener
 {
 public:
     AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, AudioProcessorValueTreeState&);
@@ -30,6 +30,10 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+
+
+    bool keyPressed (const KeyPress &key, Component *originatingComponent) override;
+
 
 private:
     // This reference is provided as a quick way for your editor to

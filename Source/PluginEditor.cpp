@@ -17,6 +17,9 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 {
     toolTipWin.setMillisecondsBeforeTipAppears (200);
     toolTipWin.setOpaque (false);
+
+    addKeyListener (this);
+
     // create a set of colours
     Array<Colour> cols;
     cols.add (Colours::limegreen);
@@ -103,5 +106,12 @@ void AbcomparisonAudioProcessorEditor::resized()
         handle->setBounds (buttonArea.removeFromLeft (120));
         buttonArea.removeFromLeft (10);
     }
+}
 
+bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress &key, Component *originatingComponent)
+{
+    const auto choice = key.getKeyCode() - 49;
+    if (choice >= 0 && choice < jmin (nChoices, 10))
+        tbChoice.getUnchecked (choice)->triggerClick();
+    return true;
 }
