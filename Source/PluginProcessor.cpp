@@ -35,9 +35,14 @@ parameters (*this, nullptr)
                                       },
                                       nullptr);
 
+    parameters.createAndAddParameter ("numberOfChoices", "Number of choices", "choices", // has an offset of 2!
+                                      NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
+                                      [](float value) { return String (value + 2, 0); },
+                                      nullptr);
+
     parameters.createAndAddParameter ("channelSize", "Output Channel Size", "channel(s)", // has an offset of 1!
-                                      NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo
-                                      [](float value) { return String (value); },
+                                      NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
+                                      [](float value) { return String (value + 1, 0); },
                                       nullptr);
 
     parameters.createAndAddParameter ("fadeTime", "Fade-Length", "ms",
@@ -46,7 +51,8 @@ parameters (*this, nullptr)
                                       nullptr);
 
 
-    for (int choice = 0; choice < nChoices; ++choice)
+
+    for (int choice = 0; choice < maxNChoices; ++choice)
     {
         parameters.createAndAddParameter ("choiceState" + String(choice), "Choice " + String::charToString(char ('A' + choice)), "",
                                           NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
@@ -61,7 +67,7 @@ parameters (*this, nullptr)
     parameters.state = ValueTree("ABComparison");
 
 
-    for (int choice = 0; choice < nChoices; ++choice)
+    for (int choice = 0; choice < maxNChoices; ++choice)
     {
         parameters.addParameterListener ("choiceState" + String(choice), this);
         choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + String(choice));
@@ -70,7 +76,7 @@ parameters (*this, nullptr)
     parameters.addParameterListener ("fadeTime", this);
     switchMode = parameters.getRawParameterValue ("switchMode");
     fadeTime = parameters.getRawParameterValue ("fadeTime");
-
+    numberOfChoices = parameters.getRawParameterValue ("numberOfChoices");
 }
 
 
@@ -143,7 +149,7 @@ void AbcomparisonAudioProcessor::changeProgramName (int index, const String& new
 //==============================================================================
 void AbcomparisonAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    for (int choice = 0; choice < nChoices; ++choice)
+    for (int choice = 0; choice < maxNChoices; ++choice)
     {
         gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
         gains[choice].setValue (*choiceStates[choice] < 0.5f ? 0.0f : 1.0f, true);
@@ -187,6 +193,7 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
 
     // remaining choices
 
+    const int nChoices = *numberOfChoices + 2;
     for (int choice = 1; choice < nChoices; ++choice)
     {
         if (gains[choice].isSmoothing() || gains[choice].getTargetValue() != 0.0f)
@@ -251,7 +258,7 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
     else if (parameterID == "fadeTime")
     {
         auto sampleRate = getSampleRate();
-        for (int choice = 0; choice < nChoices; ++choice)
+        for (int choice = 0; choice < maxNChoices; ++choice)
             gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
     }
 }
@@ -260,7 +267,7 @@ void AbcomparisonAudioProcessor::muteAllOtherChoices (const int choiceNotToMute)
 {
     ScopedValueSetter<bool> muting (mutingOtherChoices, true);
 
-    for (int i = 0; i < nChoices; ++i)
+    for (int i = 0; i < maxNChoices; ++i)
         if (i != choiceNotToMute)
             parameters.getParameter ("choiceState" + String (i))->setValue (0.0f);
 }

@@ -15,7 +15,7 @@
 
 #pragma once
 
-#define nChoices 5
+#define maxNChoices 10
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -67,11 +67,12 @@ public:
 
 private:
     AudioProcessorValueTreeState parameters;
-    LinearSmoothedValue<float> gains[nChoices];
+    LinearSmoothedValue<float> gains[maxNChoices];
 
+    float *numberOfChoices;
     float *switchMode;
     float *fadeTime;
-    float *choiceStates[nChoices];
+    float *choiceStates[maxNChoices];
 
     bool mutingOtherChoices = false;
 

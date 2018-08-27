@@ -21,7 +21,7 @@ typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor, public KeyListener
+class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor, public KeyListener, private Timer
 {
 public:
     AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, AudioProcessorValueTreeState&);
@@ -30,10 +30,10 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-
+    void updateNumberOfButtons();
 
     bool keyPressed (const KeyPress &key, Component *originatingComponent) override;
-
+    void timerCallback() override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -43,14 +43,19 @@ private:
 
     ComboBox cbSwitchMode;
     ComboBox cbChannelSize;
+    ComboBox cbNChoices;
     Slider slFadeTime;
 
-    ScopedPointer<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment;
+    int nChoices = 2;
+
+    ScopedPointer<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment, cbNChoicesAttachment;
     ScopedPointer<SliderAttachment> slFadeTimeAttachment;
 
     OwnedArray<TextButton> tbChoice;
     OwnedArray<ButtonAttachment> tbChoiceAttachments;
 
+    FlexBox flexBox;
+    
     TooltipWindow toolTipWin;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
