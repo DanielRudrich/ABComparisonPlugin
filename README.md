@@ -6,7 +6,12 @@ As per default, the plug-in can switch between **10<sup>1</sup> different input 
 There are **two switching modes**: the *exclusive solo* mode and *toggle mode*. The first one makes sure that only one choice is playing. 
 The **fade-time** can be set to values between 0ms and 1000ms.
 
-**Usage example**: Switch between three 5.1 mixes
+## Download
+Compiled VST versions of the ABComparison plug-in for macOS and windows can be downloaded here:
+- macOS: http://danielrudrich.de/plugins/ABComparison_macOS.zip
+- windows: http://danielrudrich.de/plugins/ABComparison_win_x64.zip
+
+## Usage example: Switch between three 5.1 mixes
  - create a bus with at least 3 * 6 = 18 channels
  - insert the ABComparison plugin
  - route your first 5.1 mix to channels 1 to 6
