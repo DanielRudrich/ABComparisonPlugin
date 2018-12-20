@@ -23,53 +23,13 @@ AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
                      #endif
                        ),
 #endif
-parameters (*this, nullptr)
+parameters (*this, nullptr, "ABComparison", createParameters())
 {
 
-    parameters.createAndAddParameter ("switchMode", "Switch mode", "",
-                                      NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-                                      [](float value)
-                                      {
-                                          if (value < 0.5f ) return "Exclusive Solo";
-                                          else return "Toggle Mode";
-                                      },
-                                      nullptr);
-
-    parameters.createAndAddParameter ("numberOfChoices", "Number of choices", "choices", // has an offset of 2!
-                                      NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
-                                      [](float value) { return String (value + 2, 0); },
-                                      nullptr);
-
-    parameters.createAndAddParameter ("channelSize", "Output Channel Size", "channel(s)", // has an offset of 1!
-                                      NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
-                                      [](float value) { return String (value + 1, 0); },
-                                      nullptr);
-
-    parameters.createAndAddParameter ("fadeTime", "Fade-Length", "ms",
-                                      NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
-                                      [](float value) { return String (value); },
-                                      nullptr);
-
-
 
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
-        parameters.createAndAddParameter ("choiceState" + String(choice), "Choice " + String::charToString(char ('A' + choice)), "",
-                                          NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-                                          [](float value)
-                                          {
-                                              if (value >= 0.5f ) return "ON";
-                                              else return "OFF";
-                                          },
-                                          nullptr);
-    }
-
-    parameters.state = ValueTree("ABComparison");
-
-
-    for (int choice = 0; choice < maxNChoices; ++choice)
-    {
-        parameters.addParameterListener ("choiceState" + String(choice), this);
+        parameters.addParameterListener ("choiceState" + String (choice), this);
         choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + String(choice));
     }
 
@@ -173,7 +133,9 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
 {
     ScopedNoDenormals noDenormals;
     auto nCh = buffer.getNumChannels();
+    DBG (nCh);
     const int stride = *parameters.getRawParameterValue("channelSize") + 1;
+    DBG ("Stride: " << stride);
     auto nSamples = buffer.getNumSamples();
     // choice 0
     if (! gains[0].isSmoothing() && gains[0].getTargetValue() == 0.0f)
@@ -269,9 +231,53 @@ void AbcomparisonAudioProcessor::muteAllOtherChoices (const int choiceNotToMute)
 
     for (int i = 0; i < maxNChoices; ++i)
         if (i != choiceNotToMute)
-            parameters.getParameter ("choiceState" + String (i))->setValue (0.0f);
+            parameters.getParameter ("choiceState" + String (i))->setValueNotifyingHost (0.0f);
 }
 
+AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::createParameters()
+{
+    std::vector<std::unique_ptr<RangedAudioParameter>> params;
+
+    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("switchMode", "Switch mode", "",
+                                                                   NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                                   [](float value)
+                                                                   {
+                                                                       if (value < 0.5f ) return "Exclusive Solo";
+                                                                       else return "Toggle Mode";
+                                                                   },
+                                                                                 nullptr));
+
+    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("numberOfChoices", "Number of choices", "choices", // has an offset of 2!
+                                                                   NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
+                                                                   [](float value) { return String (value + 2, 0); },
+                                                                                 nullptr));
+
+    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("channelSize", "Output Channel Size", "channel(s)", // has an offset of 1!
+                                                                   NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
+                                                                   [](float value) { return String (value + 1, 0); },
+                                                                                 nullptr));
+
+    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("fadeTime", "Fade-Length", "ms",
+                                                                   NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
+                                                                   [](float value) { return String (value); },
+                                                                                 nullptr));
+
+
+
+    for (int choice = 0; choice < maxNChoices; ++choice)
+    {
+        params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("choiceState" + String(choice), "Choice " + String::charToString(char ('A' + choice)), "",
+                                                                   NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                                   [](float value)
+                                                                   {
+                                                                       if (value >= 0.5f ) return "ON";
+                                                                       else return "OFF";
+                                                                   },
+                                                                   nullptr, true));
+    }
+
+    return { params.begin(), params.end() };
+}
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()

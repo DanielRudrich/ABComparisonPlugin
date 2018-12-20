@@ -67,6 +67,7 @@ public:
 
 private:
     AudioProcessorValueTreeState parameters;
+    AudioProcessorValueTreeState::ParameterLayout createParameters();
     LinearSmoothedValue<float> gains[maxNChoices];
 
     float *numberOfChoices;
