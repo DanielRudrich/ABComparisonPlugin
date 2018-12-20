@@ -19,7 +19,7 @@ AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::discreteChannels (64), true)
                       #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
+                       .withOutput ("Output", AudioChannelSet::discreteChannels (64), true)
                      #endif
                        ),
 #endif
