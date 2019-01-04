@@ -226,13 +226,17 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
 
 void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, float newValue)
 {
-    if (parameterID.startsWith("choiceState"))
+    if (parameterID.startsWith ("choiceState"))
     {
-        auto choice = parameterID.substring(11).getIntValue();
+        auto choice = parameterID.substring (11).getIntValue();
+        const bool wasOnBefore = gains[choice].getTargetValue() == 1.0f;
         gains[choice].setValue (newValue);
         if (*switchMode < 0.5f && ! mutingOtherChoices) // exclusive solo
         {
-            muteAllOtherChoices (choice);
+            if (wasOnBefore)
+                parameters.getParameter ("choiceState" + String (choice))->setValueNotifyingHost (1.0f);
+            else
+                muteAllOtherChoices (choice);
         }
     }
     else if (parameterID == "fadeTime")
