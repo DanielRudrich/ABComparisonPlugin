@@ -87,7 +87,12 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     updateNumberOfButtons ();
 
     // set the size of the GUI so the number of choices (nChoices) will fit in there
-    setResizeLimits (460, 300, 1440, 700);
+    {
+        ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
+        setResizeLimits (460, 300, 1440, 700);
+        setSize (jmin (processor.editorWidth.get(), 1440), jmin (processor.editorHeight.get(), 700));
+    }
+
     startTimer (50);
 }
 
@@ -143,6 +148,8 @@ void AbcomparisonAudioProcessorEditor::resized()
 
     flexBox.performLayout (bounds);
 
+    if (! editorIsResizing) // user is
+        processor.setEditorSize (getWidth(), getHeight());
 }
 
 bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress &key, Component *originatingComponent)
@@ -177,4 +184,11 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
 {
     if (cbNChoices.getSelectedId() + 1 != nChoices)
         updateNumberOfButtons();
+
+    if (processor.resizeEditorWindow.get())
+    {
+        ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
+        setSize (processor.editorWidth.get(), processor.editorHeight.get());
+        processor.resizeEditorWindow = false;
+    }
 }

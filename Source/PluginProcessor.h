@@ -77,6 +77,12 @@ public:
     void parameterChanged (const String &parameterID, float newValue) override;
     void muteAllOtherChoices (const int choiceNotToMute);
 
+    // === public flag for editor, signaling to resize window
+    Atomic<bool> resizeEditorWindow = false;
+    void setEditorSize (int width, int height);
+    Atomic<int> editorWidth = 740;
+    Atomic<int> editorHeight = 300;
+
 private:
     AudioProcessorValueTreeState parameters;
     AudioProcessorValueTreeState::ParameterLayout createParameters();
@@ -88,6 +94,9 @@ private:
     float *choiceStates[maxNChoices];
 
     bool mutingOtherChoices = false;
+
+
+
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessor)

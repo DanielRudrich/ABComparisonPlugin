@@ -145,9 +145,7 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
 {
     ScopedNoDenormals noDenormals;
     auto nCh = buffer.getNumChannels();
-    DBG (nCh);
-    const int stride = *parameters.getRawParameterValue("channelSize") + 1;
-    DBG ("Stride: " << stride);
+    const int stride = *parameters.getRawParameterValue ("channelSize") + 1;
     auto nSamples = buffer.getNumSamples();
     // choice 0
     if (! gains[0].isSmoothing() && gains[0].getTargetValue() == 0.0f)
@@ -215,7 +213,15 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
     if (xmlState.get() != nullptr)
         if (xmlState->hasTagName (parameters.state.getType()))
+        {
             parameters.replaceState (ValueTree::fromXml (*xmlState));
+            if (parameters.state.hasProperty("editorWidth") && parameters.state.hasProperty("editorHeight"))
+            {
+                editorWidth = parameters.state.getProperty ("editorWidth");
+                editorHeight = parameters.state.getProperty ("editorHeight");
+                resizeEditorWindow = true;
+            }
+        }
 }
 
 void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, float newValue)
@@ -291,6 +297,20 @@ AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::create
     return { params.begin(), params.end() };
 }
 //==============================================================================
+
+
+
+
+void AbcomparisonAudioProcessor::setEditorSize (int width, int height)
+{
+    editorWidth = width;
+    editorHeight = height;
+    DBG ("Editor called setEditorSize: " << width << "x" << height);
+
+    parameters.state.setProperty ("editorWidth", width, nullptr);
+    parameters.state.setProperty ("editorHeight", height, nullptr);
+}
+
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {

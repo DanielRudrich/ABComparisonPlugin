@@ -69,6 +69,8 @@ private:
     FlexBox flexBox;
     
     TooltipWindow toolTipWin;
-    
+
+    bool editorIsResizing = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
 };
