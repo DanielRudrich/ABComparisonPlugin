@@ -101,11 +101,25 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
-    g.setColour (Colours::white);
-    g.setFont (30.0f);
+    const String title = "ABComparison";
+
+    Font font = Font (30.0f);
+    const float titleWidth = font.getStringWidth (title);
+
     auto bounds = getLocalBounds();
     bounds.removeFromTop (15);
-    g.drawFittedText ("ABComparison", bounds, Justification::centredTop, 1);
+    g.setFont (font);
+    g.setColour (Colours::white);
+    g.drawFittedText (title, bounds, Justification::centredTop, 1);
+
+    const float reduceAmount = 0.5f * (bounds.getWidth() + titleWidth);
+    bounds.removeFromLeft (static_cast<int> (ceil (reduceAmount)));
+
+    String versionString = "v";
+    versionString.append (JucePlugin_VersionString, 6);
+
+    g.setFont (12.0f);
+    g.drawFittedText (versionString, bounds, Justification::topLeft, 1);
 }
 
 void AbcomparisonAudioProcessorEditor::resized()

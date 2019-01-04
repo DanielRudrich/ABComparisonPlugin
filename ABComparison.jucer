@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="UsFXxD" name="ABComparison" projectType="audioplug" jucerVersion="5.4.1"
               pluginFormats="buildStandalone,buildVST" pluginManufacturer="Daniel Rudrich"
-              version="1.0.1">
+              version="1.1.0">
   <MAINGROUP id="Aj4FzS" name="ABComparison">
     <GROUP id="{F6720308-8EC1-EF1E-6DEA-0057027F32D4}" name="Source">
       <FILE id="e9JUBz" name="PluginProcessor.cpp" compile="1" resource="0"
