@@ -27,8 +27,6 @@
 
 #pragma once
 
-#define maxNChoices 10
-
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
@@ -37,6 +35,9 @@
 class AbcomparisonAudioProcessor  : public AudioProcessor, private AudioProcessorValueTreeState::Listener
 {
 public:
+    //==============================================================================
+    static constexpr int maxNChoices = 32;
+
     //==============================================================================
     AbcomparisonAudioProcessor();
     ~AbcomparisonAudioProcessor();
@@ -82,7 +83,7 @@ public:
     void setEditorSize (int width, int height);
     Atomic<int> editorWidth = 740;
     Atomic<int> editorHeight = 300;
-
+    Atomic<bool> numberOfChoicesHasChanged = false;
 private:
     AudioProcessorValueTreeState parameters;
     AudioProcessorValueTreeState::ParameterLayout createParameters();

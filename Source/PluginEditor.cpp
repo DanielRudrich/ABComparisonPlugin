@@ -41,22 +41,22 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     cols.add (Colours::magenta);
 
     addAndMakeVisible (cbSwitchMode);
-    cbSwitchMode.addSectionHeading("Switch Mode");
+    cbSwitchMode.addSectionHeading ("Switch Mode");
     cbSwitchMode.addItem ("Exclusive Solo", 1);
     cbSwitchMode.addItem ("Toggle Mode", 2);
     cbSwitchModeAttachment = new ComboBoxAttachment (parameters, "switchMode", cbSwitchMode);
 
     addAndMakeVisible (cbNChoices);
-    cbNChoices.addSectionHeading("Number of choices");
-    for (int i = 2; i <= maxNChoices; ++i)
+    cbNChoices.addSectionHeading ("Number of choices");
+    for (int i = 2; i <= processor.maxNChoices; ++i)
     {
-        cbNChoices.addItem (String(i) + " choices", i - 1);
+        cbNChoices.addItem (String (i) + " choices", i - 1);
     }
 
     cbNChoicesAttachment = new ComboBoxAttachment (parameters, "numberOfChoices", cbNChoices);
 
     addAndMakeVisible (cbChannelSize);
-    cbChannelSize.addSectionHeading("Number of channels per choice");
+    cbChannelSize.addSectionHeading ("Number of channels per choice");
 
     for (int i = 1; i <= 32; ++i)
     {
@@ -69,22 +69,22 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     addAndMakeVisible (slFadeTime);
     slFadeTimeAttachment = new SliderAttachment (parameters, "fadeTime", slFadeTime);
     slFadeTime.setTooltip ("Cross-fade time (in ms)");
-    slFadeTime.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 20);
+    slFadeTime.setTextBoxStyle (Slider::TextBoxBelow, false, 40, 20);
 
     flexBox.flexWrap = FlexBox::Wrap::wrap;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
 
-    for (int choice = 0; choice < maxNChoices; ++choice)
+    for (int choice = 0; choice < processor.maxNChoices; ++choice)
     {
         auto handle = tbChoice.add (new TextButton);
         addAndMakeVisible (handle);
 
-        tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + String(choice), *handle));
+        tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + String (choice), *handle));
         handle->setClickingTogglesState (true);
-        handle->setButtonText (String::charToString(char ('A' + choice)));
+        handle->setButtonText (String (choice + 1));
         handle->setColour (TextButton::buttonOnColourId, cols[choice % cols.size()]);
     }
-    updateNumberOfButtons ();
+    updateNumberOfButtons();
 
     // set the size of the GUI so the number of choices (nChoices) will fit in there
     {
@@ -157,7 +157,7 @@ bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress &key, Componen
     auto choice = key.getKeyCode() - 49;
     if (choice == - 1)
         choice = 9;
-    if (choice >= 0 && choice < jmin (maxNChoices, 10))
+    if (choice >= 0 && choice < jmin (processor.maxNChoices, 10))
         tbChoice.getUnchecked (choice)->triggerClick();
     return true;
 }
@@ -169,12 +169,12 @@ void AbcomparisonAudioProcessorEditor::updateNumberOfButtons()
 
     for (int choice = 0; choice < nChoices; ++choice)
     {
-        tbChoice.getUnchecked(choice)->setVisible (true);
-        flexBox.items.add (FlexItem (120, 120, *tbChoice.getUnchecked(choice)).withMargin ({10, 10, 10, 10}));
+        tbChoice.getUnchecked (choice)->setVisible (true);
+        flexBox.items.add (FlexItem (120, 120, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
     }
-    for (int choice = nChoices; choice < maxNChoices; ++choice)
+    for (int choice = nChoices; choice < processor.maxNChoices; ++choice)
     {
-        tbChoice.getUnchecked(choice)->setVisible (false);
+        tbChoice.getUnchecked (choice)->setVisible (false);
     }
 
     repaint();
@@ -190,5 +190,12 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
         ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
         setSize (processor.editorWidth.get(), processor.editorHeight.get());
         processor.resizeEditorWindow = false;
+    }
+
+    if (processor.numberOfChoicesHasChanged.get())
+    {
+        updateNumberOfButtons();
+        resized();
+        processor.numberOfChoicesHasChanged = false;
     }
 }

@@ -67,7 +67,7 @@ private:
     OwnedArray<ButtonAttachment> tbChoiceAttachments;
 
     FlexBox flexBox;
-    
+
     TooltipWindow toolTipWin;
 
     bool editorIsResizing = false;

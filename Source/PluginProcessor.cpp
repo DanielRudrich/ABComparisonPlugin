@@ -42,8 +42,10 @@ parameters (*this, nullptr, "ABComparison", createParameters())
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
         parameters.addParameterListener ("choiceState" + String (choice), this);
-        choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + String(choice));
+        choiceStates[choice] = parameters.getRawParameterValue ("choiceState" + String (choice));
     }
+
+    parameters.addParameterListener ("numberOfChoices", this);
 
     parameters.addParameterListener ("fadeTime", this);
     switchMode = parameters.getRawParameterValue ("switchMode");
@@ -150,8 +152,8 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
     // choice 0
     if (! gains[0].isSmoothing() && gains[0].getTargetValue() == 0.0f)
     {
-        for (int ch = 0; ch < jmin(nCh, stride); ++ch)
-            buffer.clear(ch, 0, nSamples);
+        for (int ch = 0; ch < jmin (nCh, stride); ++ch)
+            buffer.clear (ch, 0, nSamples);
     }
     else
     {
@@ -159,8 +161,8 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
         gains[0].skip (nSamples - 2);
         const float endGain = gains[0].getNextValue();
 
-        for (int ch = 0; ch < jmin(nCh, stride); ++ch)
-            buffer.applyGainRamp(ch, 0, nSamples, startGain, endGain);
+        for (int ch = 0; ch < jmin (nCh, stride); ++ch)
+            buffer.applyGainRamp (ch, 0, nSamples, startGain, endGain);
     }
 
     // remaining choices
@@ -185,7 +187,7 @@ void AbcomparisonAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiB
 
     // clear not needed channels
     for (int ch = stride; ch < nCh; ++ch)
-        buffer.clear(ch, 0, nSamples);
+        buffer.clear (ch, 0, nSamples);
 
 }
 
@@ -215,7 +217,7 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
         if (xmlState->hasTagName (parameters.state.getType()))
         {
             parameters.replaceState (ValueTree::fromXml (*xmlState));
-            if (parameters.state.hasProperty("editorWidth") && parameters.state.hasProperty("editorHeight"))
+            if (parameters.state.hasProperty ("editorWidth") && parameters.state.hasProperty ("editorHeight"))
             {
                 editorWidth = parameters.state.getProperty ("editorWidth");
                 editorHeight = parameters.state.getProperty ("editorHeight");
@@ -244,6 +246,10 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
         auto sampleRate = getSampleRate();
         for (int choice = 0; choice < maxNChoices; ++choice)
             gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
+    }
+    else if (parameterID == "numberOfChoices")
+    {
+        numberOfChoicesHasChanged = true;
     }
 }
 
@@ -274,7 +280,7 @@ AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::create
                                                                    [](float value) { return String (value + 2, 0); },
                                                                                  nullptr));
 
-    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("channelSize", "Output Channel Size", "channel(s)", // has an offset of 1!
+    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("channelSize", "Output Channel Size", "channel (s)", // has an offset of 1!
                                                                    NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
                                                                    [](float value) { return String (value + 1, 0); },
                                                                                  nullptr));
@@ -288,7 +294,7 @@ AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::create
 
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
-        params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("choiceState" + String(choice), "Choice " + String::charToString(char ('A' + choice)), "",
+        params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("choiceState" + String (choice), "Choice " + String::charToString (char ('A' + choice)), "",
                                                                    NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
                                                                    [](float value)
                                                                    {
