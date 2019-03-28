@@ -1,7 +1,7 @@
 # ABComparisonPlugin
 The ABComparison is a simple channel routing plug-in for AB-comparison tests. 
 
-As per default, the plug-in can switch between **10<sup>1</sup> different input streams** with configurable **channel width** (up to 32 channels). 
+As per default, the plug-in can switch between **10<sup>1</sup> different input streams** with configurable **channel width** (up to 32 channels). **Update:** plug-in now handles up to 32 input streams, however the joke in the footnotes wouldn't work anymore as there are only so many letters in the alphabet...
 
 There are **two switching modes**: the *exclusive solo* mode and *toggle mode*. The first one makes sure that only one choice is playing. 
 The **fade-time** can be set to values between 0ms and 1000ms.
