@@ -41,35 +41,35 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     cols.add (Colours::magenta);
 
     addAndMakeVisible (cbSwitchMode);
-    cbSwitchMode.addSectionHeading ("Switch Mode");
     cbSwitchMode.addItem ("Exclusive Solo", 1);
     cbSwitchMode.addItem ("Toggle Mode", 2);
-    cbSwitchModeAttachment = new ComboBoxAttachment (parameters, "switchMode", cbSwitchMode);
+    cbSwitchModeAttachment.reset (new ComboBoxAttachment (parameters, "switchMode", cbSwitchMode));
 
     addAndMakeVisible (cbNChoices);
-    cbNChoices.addSectionHeading ("Number of choices");
+    cbNChoices.setJustificationType (Justification::centred);
     for (int i = 2; i <= processor.maxNChoices; ++i)
-    {
-        cbNChoices.addItem (String (i) + " choices", i - 1);
-    }
+        cbNChoices.addItem (String (i), i - 1);
 
-    cbNChoicesAttachment = new ComboBoxAttachment (parameters, "numberOfChoices", cbNChoices);
+    cbNChoicesAttachment.reset (new ComboBoxAttachment (parameters, "numberOfChoices", cbNChoices));
 
     addAndMakeVisible (cbChannelSize);
-    cbChannelSize.addSectionHeading ("Number of channels per choice");
+    cbChannelSize.setJustificationType (Justification::centred);
 
     for (int i = 1; i <= 32; ++i)
-    {
         cbChannelSize.addItem (String (i) + " ch", i);
-    }
 
-    cbChannelSizeAttachment = new ComboBoxAttachment (parameters, "channelSize", cbChannelSize);
+    cbChannelSizeAttachment.reset (new ComboBoxAttachment (parameters, "channelSize", cbChannelSize));
 
 
     addAndMakeVisible (slFadeTime);
-    slFadeTimeAttachment = new SliderAttachment (parameters, "fadeTime", slFadeTime);
+    slFadeTimeAttachment.reset (new SliderAttachment (parameters, "fadeTime", slFadeTime));
     slFadeTime.setTooltip ("Cross-fade time (in ms)");
-    slFadeTime.setTextBoxStyle (Slider::TextBoxBelow, false, 40, 20);
+    slFadeTime.setTextBoxStyle (Slider::TextBoxBelow, false, 80, 20);
+    slFadeTime.setTextValueSuffix (" ms");
+
+    addAndMakeVisible (tbEditLabels);
+    tbEditLabels.setButtonText ("Labels");
+    tbEditLabels.onClick = [this] () { editLabels(); };
 
     flexBox.flexWrap = FlexBox::Wrap::wrap;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
@@ -81,10 +81,10 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 
         tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + String (choice), *handle));
         handle->setClickingTogglesState (true);
-        handle->setButtonText (String (choice + 1));
         handle->setColour (TextButton::buttonOnColourId, cols[choice % cols.size()]);
     }
     updateNumberOfButtons();
+
 
     // set the size of the GUI so the number of choices (nChoices) will fit in there
     {
@@ -93,6 +93,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
         setSize (jmin (processor.editorWidth.get(), 1440), jmin (processor.editorHeight.get(), 700));
     }
 
+    updateLabelText();
     startTimer (50);
 }
 
@@ -113,39 +114,55 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
 
     auto bounds = getLocalBounds();
     bounds.removeFromTop (15);
+    auto titleRow = bounds.removeFromTop (40);
+
     g.setFont (font);
     g.setColour (Colours::white);
-    g.drawFittedText (title, bounds, Justification::centredTop, 1);
+    g.drawFittedText (title, titleRow, Justification::centredTop, 1);
 
-    const float reduceAmount = 0.5f * (bounds.getWidth() + titleWidth);
-    bounds.removeFromLeft (static_cast<int> (ceil (reduceAmount)));
+    const float reduceAmount = 0.5f * (titleRow.getWidth() + titleWidth);
+    titleRow.removeFromLeft (static_cast<int> (ceil (reduceAmount)));
 
     String versionString = "v";
     versionString.append (JucePlugin_VersionString, 6);
 
     g.setFont (12.0f);
-    g.drawFittedText (versionString, bounds, Justification::topLeft, 1);
+    g.drawFittedText (versionString, titleRow, Justification::topLeft, 1);
+
+    auto headlineRow = bounds.removeFromTop (14);
+    headlineRow.removeFromLeft (15);
+
+    g.setFont (14.0f);
+    g.drawText ("Choices", headlineRow.removeFromLeft (80), Justification::centred, 1);
+    g.drawText (CharPointer_UTF8 ("\xc3\xa0"), headlineRow.removeFromLeft (10), Justification::centred, 1);
+    g.drawText ("Channels", headlineRow.removeFromLeft (80), Justification::centred, 1);
+    headlineRow.removeFromLeft (10);
+    g.drawText ("Switch mode", headlineRow.removeFromLeft (120), Justification::centred, 1);
+    headlineRow.removeFromLeft (10);
+    g.drawText ("FadeTime", headlineRow.removeFromLeft (120), Justification::centred, 1);
 }
 
 void AbcomparisonAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
-    bounds.removeFromTop (80);
+    bounds.removeFromTop (70);
     bounds.removeFromLeft (15);
     bounds.removeFromRight (15);
 
-    auto settingsArea = bounds.removeFromTop (30);
-    cbNChoices.setBounds (settingsArea.removeFromLeft (100));
+    auto settingsArea = bounds.removeFromTop (26);
+    cbNChoices.setBounds (settingsArea.removeFromLeft (80));
     settingsArea.removeFromLeft (10);
     cbChannelSize.setBounds (settingsArea.removeFromLeft (80));
     settingsArea.removeFromLeft (10);
     cbSwitchMode.setBounds (settingsArea.removeFromLeft (120));
     settingsArea.removeFromLeft (10);
-    slFadeTime.setBounds (settingsArea.removeFromLeft (160).withHeight (45));
+    slFadeTime.setBounds (settingsArea.removeFromLeft (120).withHeight (45));
     settingsArea.removeFromLeft (10);
+    tbEditLabels.setBounds (settingsArea.removeFromLeft (100));
 
     bounds.removeFromTop (30);
 
+    flexBoxArea = bounds;
     flexBox.performLayout (bounds);
 
     if (! editorIsResizing) // user is
@@ -198,4 +215,53 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
         resized();
         processor.numberOfChoicesHasChanged = false;
     }
+
+    if (processor.updateLabelText.get())
+    {
+        updateLabelText();
+        processor.updateLabelText = false;
+    }
+
+    if (processor.updateButtonSize.get())
+    {
+        updateButtonSize();
+        processor.updateButtonSize = false;
+    }
+}
+
+void AbcomparisonAudioProcessorEditor::editLabels()
+{
+    auto* settings = new SettingsComponent (processor);
+    settings->setSize (300, 250);
+
+    CallOutBox::launchAsynchronously (settings, tbEditLabels.getScreenBounds(), nullptr);
+}
+
+void AbcomparisonAudioProcessorEditor::updateLabelText()
+{
+    auto labels = StringArray::fromLines (processor.getLabelText());
+
+    const int nButtons = tbChoice.size();
+
+    int i = 0;
+    for (; i < jmin (labels.size(), nButtons); ++i)
+        tbChoice[i]->setButtonText (labels[i]);
+
+    for (; i < nButtons; ++i)
+        tbChoice[i]->setButtonText (String (i + 1));
+}
+
+void AbcomparisonAudioProcessorEditor::updateButtonSize()
+{
+    const int size = processor.getButtonSize();
+
+    for (auto& item : flexBox.items)
+    {
+        item.width = size;
+        item.minWidth = size;
+        item.height = size;
+        item.minHeight = size;
+    }
+
+    flexBox.performLayout (flexBoxArea);
 }

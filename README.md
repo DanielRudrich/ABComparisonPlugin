@@ -6,6 +6,8 @@ As per default, the plug-in can switch between **10<sup>1</sup> different input 
 There are **two switching modes**: the *exclusive solo* mode and *toggle mode*. The first one makes sure that only one choice is playing. 
 The **fade-time** can be set to values between 0ms and 1000ms.
 
+**New with version 1.3.0**: The button size and displayed text labels are now customizable! 
+
 ## Download
 Compiled VST versions of the ABComparison plug-in for macOS and windows can be downloaded here:
 - macOS: http://danielrudrich.de/plugins/ABComparison_macOS.zip

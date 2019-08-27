@@ -37,8 +37,6 @@ AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
 #endif
 parameters (*this, nullptr, "ABComparison", createParameters())
 {
-
-
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
         parameters.addParameterListener ("choiceState" + String (choice), this);
@@ -126,7 +124,7 @@ void AbcomparisonAudioProcessor::prepareToPlay (double sampleRate, int samplesPe
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
         gains[choice].reset (sampleRate, *fadeTime / 1000.0f);
-        gains[choice].setValue (*choiceStates[choice] < 0.5f ? 0.0f : 1.0f, true);
+        gains[choice].setCurrentAndTargetValue (*choiceStates[choice] < 0.5f ? 0.0f : 1.0f);
     }
 }
 
@@ -223,6 +221,12 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
                 editorHeight = parameters.state.getProperty ("editorHeight");
                 resizeEditorWindow = true;
             }
+
+            if (parameters.state.hasProperty ("labelText"))
+                setLabelText (parameters.state.getProperty ("labelText"));
+
+            if (parameters.state.hasProperty ("buttonSize"))
+                setButtonSize (parameters.state.getProperty ("buttonSize"));
         }
 }
 
@@ -232,7 +236,7 @@ void AbcomparisonAudioProcessor::parameterChanged (const String &parameterID, fl
     {
         auto choice = parameterID.substring (11).getIntValue();
         const bool wasOnBefore = gains[choice].getTargetValue() == 1.0f;
-        gains[choice].setValue (newValue);
+        gains[choice].setTargetValue (newValue);
         if (*switchMode < 0.5f && ! mutingOtherChoices) // exclusive solo
         {
             if (wasOnBefore)
@@ -325,4 +329,23 @@ void AbcomparisonAudioProcessor::setEditorSize (int width, int height)
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new AbcomparisonAudioProcessor();
+}
+
+
+void AbcomparisonAudioProcessor::setLabelText (String newLabelText)
+{
+    labelText = newLabelText;
+    parameters.state.setProperty ("labelText", labelText, nullptr);
+
+    updateLabelText = true;
+}
+
+
+void AbcomparisonAudioProcessor::setButtonSize (int newSize)
+{
+    DBG ("setButtonSize");
+    buttonSize = newSize;
+    parameters.state.setProperty ("buttonSize", newSize, nullptr);
+
+    updateButtonSize = true;
 }

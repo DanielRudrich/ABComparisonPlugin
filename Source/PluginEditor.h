@@ -24,7 +24,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-
+#include "SettingsComponent.h"
 
 typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 typedef AudioProcessorValueTreeState::ComboBoxAttachment ComboBoxAttachment;
@@ -47,6 +47,10 @@ public:
     bool keyPressed (const KeyPress &key, Component *originatingComponent) override;
     void timerCallback() override;
 
+    void editLabels();
+    void updateLabelText();
+    void updateButtonSize();
+
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -60,13 +64,16 @@ private:
 
     int nChoices = 2;
 
-    ScopedPointer<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment, cbNChoicesAttachment;
-    ScopedPointer<SliderAttachment> slFadeTimeAttachment;
+    std::unique_ptr<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment, cbNChoicesAttachment;
+    std::unique_ptr<SliderAttachment> slFadeTimeAttachment;
 
     OwnedArray<TextButton> tbChoice;
     OwnedArray<ButtonAttachment> tbChoiceAttachments;
 
+    TextButton tbEditLabels;
+
     FlexBox flexBox;
+    Rectangle<int> flexBoxArea;
 
     TooltipWindow toolTipWin;
 

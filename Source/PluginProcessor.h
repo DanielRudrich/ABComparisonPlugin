@@ -80,10 +80,19 @@ public:
 
     // === public flag for editor, signaling to resize window
     Atomic<bool> resizeEditorWindow = false;
+    Atomic<bool> updateLabelText = false;
+    Atomic<bool> updateButtonSize = false;
     void setEditorSize (int width, int height);
     Atomic<int> editorWidth = 740;
     Atomic<int> editorHeight = 300;
     Atomic<bool> numberOfChoicesHasChanged = false;
+
+    void setLabelText (String labelText);
+    const String getLabelText() { return labelText; };
+
+    void setButtonSize (int newSize);
+    const int getButtonSize() { return buttonSize.get(); };
+
 private:
     AudioProcessorValueTreeState parameters;
     AudioProcessorValueTreeState::ParameterLayout createParameters();
@@ -96,7 +105,8 @@ private:
 
     bool mutingOtherChoices = false;
 
-
+    String labelText = "";
+    Atomic<int> buttonSize = 120;
 
 
     //==============================================================================
