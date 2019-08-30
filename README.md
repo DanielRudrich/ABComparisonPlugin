@@ -13,6 +13,9 @@ Compiled VST versions of the ABComparison plug-in for macOS and windows can be d
 - macOS: http://danielrudrich.de/plugins/ABComparison_macOS.zip
 - windows: http://danielrudrich.de/plugins/ABComparison_win_x64.zip
 
+## Edit labels and button sizes
+Click on the 'labels' button to edit the text on the buttons and their sizes. Separate the individual labels by new lines. If you don't define as many labels as buttons, the remaining buttons will be numbered.
+
 ## Usage example: Switch between three 5.1 mixes
  - create a bus with at least 3 * 6 = 18 channels
  - insert the ABComparison plugin
