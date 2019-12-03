@@ -269,44 +269,33 @@ void AbcomparisonAudioProcessor::muteAllOtherChoices (const int choiceNotToMute)
 AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
+    using Parameter = AudioProcessorValueTreeState::Parameter;
+    params.push_back (std::make_unique<Parameter> ("switchMode", "Switch mode", "",
+                                                   NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                   [](float value)  { return value < 0.5f ? "Exclusive Solo" : "Toggle Mode"; },
+                                                   nullptr));
 
-    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("switchMode", "Switch mode", "",
-                                                                   NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-                                                                   [](float value)
-                                                                   {
-                                                                       if (value < 0.5f ) return "Exclusive Solo";
-                                                                       else return "Toggle Mode";
-                                                                   },
-                                                                                 nullptr));
+    params.push_back (std::make_unique<Parameter> ("numberOfChoices", "Number of choices", "choices", // has an offset of 2!
+                                                   NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
+                                                   [](float value) { return String (value + 2, 0); },
+                                                   nullptr));
 
-    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("numberOfChoices", "Number of choices", "choices", // has an offset of 2!
-                                                                   NormalisableRange<float> (0.0f, maxNChoices - 2.0f, 1.0f), 3.0f,
-                                                                   [](float value) { return String (value + 2, 0); },
-                                                                                 nullptr));
+    params.push_back (std::make_unique<Parameter> ("channelSize", "Output Channel Size", "channel (s)", // has an offset of 1!
+                                                   NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
+                                                   [](float value) { return String (value + 1, 0); },
+                                                   nullptr));
 
-    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("channelSize", "Output Channel Size", "channel (s)", // has an offset of 1!
-                                                                   NormalisableRange<float> (0.0f, 31.0f, 1.0f), 1.0f, // default is stereo (2 channels)
-                                                                   [](float value) { return String (value + 1, 0); },
-                                                                                 nullptr));
-
-    params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("fadeTime", "Fade-Length", "ms",
-                                                                   NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
-                                                                   [](float value) { return String (value); },
-                                                                                 nullptr));
-
-
+    params.push_back (std::make_unique<Parameter> ("fadeTime", "Fade-Length", "ms",
+                                                   NormalisableRange<float> (0.0f, 1000.0f, 1.0f), 50.0f,
+                                                   [](float value) { return String (value); },
+                                                   nullptr));
 
     for (int choice = 0; choice < maxNChoices; ++choice)
-    {
-        params.push_back (std::make_unique<AudioProcessorValueTreeState::Parameter> ("choiceState" + String (choice), "Choice " + String::charToString (char ('A' + choice)), "",
-                                                                   NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
-                                                                   [](float value)
-                                                                   {
-                                                                       if (value >= 0.5f ) return "ON";
-                                                                       else return "OFF";
-                                                                   },
-                                                                   nullptr, true));
-    }
+        params.push_back (std::make_unique<Parameter> ("choiceState" + String (choice),
+                                                       "Choice " + String::charToString (char ('A' + choice)), "",
+                                                       NormalisableRange<float> (0.0f, 1.0f, 1.0f), 0.0f,
+                                                       [](float value) { return value >= 0.5f ? "ON" :  "OFF"; },
+                                                       nullptr, true));
 
     return { params.begin(), params.end() };
 }

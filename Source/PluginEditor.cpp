@@ -133,12 +133,12 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
     headlineRow.removeFromLeft (15);
 
     g.setFont (14.0f);
-    g.drawText ("Choices", headlineRow.removeFromLeft (80), Justification::centred, 1);
+    g.drawText ("Choices", headlineRow.removeFromLeft (65), Justification::centred, 1);
     g.drawText (CharPointer_UTF8 ("\xc3\xa0"), headlineRow.removeFromLeft (10), Justification::centred, 1);
-    g.drawText ("Channels", headlineRow.removeFromLeft (80), Justification::centred, 1);
+    g.drawText ("Channels", headlineRow.removeFromLeft (75), Justification::centred, 1);
     headlineRow.removeFromLeft (10);
-    g.drawText ("Switch mode", headlineRow.removeFromLeft (120), Justification::centred, 1);
-    headlineRow.removeFromLeft (10);
+    g.drawText ("Switch mode", headlineRow.removeFromLeft (110), Justification::centred, 1);
+    headlineRow.removeFromLeft (7);
     g.drawText ("FadeTime", headlineRow.removeFromLeft (120), Justification::centred, 1);
 }
 
@@ -150,15 +150,15 @@ void AbcomparisonAudioProcessorEditor::resized()
     bounds.removeFromRight (15);
 
     auto settingsArea = bounds.removeFromTop (26);
-    cbNChoices.setBounds (settingsArea.removeFromLeft (80));
+    cbNChoices.setBounds (settingsArea.removeFromLeft (65));
     settingsArea.removeFromLeft (10);
-    cbChannelSize.setBounds (settingsArea.removeFromLeft (80));
+    cbChannelSize.setBounds (settingsArea.removeFromLeft (75));
     settingsArea.removeFromLeft (10);
     cbSwitchMode.setBounds (settingsArea.removeFromLeft (120));
-    settingsArea.removeFromLeft (10);
-    slFadeTime.setBounds (settingsArea.removeFromLeft (120).withHeight (45));
-    settingsArea.removeFromLeft (10);
-    tbEditLabels.setBounds (settingsArea.removeFromLeft (80));
+    settingsArea.removeFromLeft (7);
+    slFadeTime.setBounds (settingsArea.removeFromLeft (110).withHeight (45));
+    settingsArea.removeFromLeft (7);
+    tbEditLabels.setBounds (settingsArea.removeFromLeft (75));
 
     bounds.removeFromTop (30);
 
