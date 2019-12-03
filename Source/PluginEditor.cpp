@@ -158,7 +158,7 @@ void AbcomparisonAudioProcessorEditor::resized()
     settingsArea.removeFromLeft (10);
     slFadeTime.setBounds (settingsArea.removeFromLeft (120).withHeight (45));
     settingsArea.removeFromLeft (10);
-    tbEditLabels.setBounds (settingsArea.removeFromLeft (100));
+    tbEditLabels.setBounds (settingsArea.removeFromLeft (80));
 
     bounds.removeFromTop (30);
 
