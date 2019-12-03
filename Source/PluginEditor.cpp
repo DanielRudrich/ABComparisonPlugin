@@ -183,11 +183,12 @@ void AbcomparisonAudioProcessorEditor::updateNumberOfButtons()
 {
     flexBox.items.clear();
     nChoices = cbNChoices.getSelectedId() + 1;
+    const int size = processor.getButtonSize();
 
     for (int choice = 0; choice < nChoices; ++choice)
     {
         tbChoice.getUnchecked (choice)->setVisible (true);
-        flexBox.items.add (FlexItem (120, 120, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
+        flexBox.items.add (FlexItem (size, size, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
     }
     for (int choice = nChoices; choice < processor.maxNChoices; ++choice)
     {
