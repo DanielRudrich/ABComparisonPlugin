@@ -98,10 +98,10 @@ private:
     AudioProcessorValueTreeState::ParameterLayout createParameters();
     LinearSmoothedValue<float> gains[maxNChoices];
 
-    float *numberOfChoices;
-    float *switchMode;
-    float *fadeTime;
-    float *choiceStates[maxNChoices];
+    std::atomic<float>* numberOfChoices;
+    std::atomic<float>* switchMode;
+    std::atomic<float>* fadeTime;
+    std::atomic<float>* choiceStates[maxNChoices];
 
     bool mutingOtherChoices = false;
 
