@@ -272,6 +272,6 @@ void AbcomparisonAudioProcessorEditor::updateButtonSize()
 
 void AbcomparisonAudioProcessorEditor::oscMessageReceived(const OSCMessage& msg) {
     int choice = msg[0].getInt32();
-    if (choice >= 0 && choice < jmin (nChoices, 10))
+    if (choice >= 0 && choice < nChoices)
         tbChoice.getUnchecked (choice)->triggerClick();
 }
