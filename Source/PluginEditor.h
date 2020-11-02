@@ -33,7 +33,11 @@ typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor, public KeyListener, private Timer
+class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor,
+    public KeyListener,
+    private Timer,
+    private OSCReceiver,
+    private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
     AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, AudioProcessorValueTreeState&);
@@ -50,6 +54,8 @@ public:
     void editLabels();
     void updateLabelText();
     void updateButtonSize();
+
+    void oscMessageReceived(const OSCMessage&) override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -78,6 +84,8 @@ private:
     TooltipWindow toolTipWin;
 
     bool editorIsResizing = false;
+
+    int OSCPort = 8081;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
 };

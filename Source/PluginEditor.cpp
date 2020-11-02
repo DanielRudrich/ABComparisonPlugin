@@ -95,6 +95,9 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 
     updateLabelText();
     startTimer (50);
+
+    connect(OSCPort);
+    juce::OSCReceiver::addListener(this, OSCAddress("/switch"));
 }
 
 AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()
@@ -265,4 +268,10 @@ void AbcomparisonAudioProcessorEditor::updateButtonSize()
     }
 
     flexBox.performLayout (flexBoxArea);
+}
+
+void AbcomparisonAudioProcessorEditor::oscMessageReceived(const OSCMessage& msg) {
+    int choice = msg[0].getInt32();
+    if (choice >= 0 && choice < jmin (nChoices, 10))
+        tbChoice.getUnchecked (choice)->triggerClick();
 }
