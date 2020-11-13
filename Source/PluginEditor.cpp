@@ -304,7 +304,7 @@ void AbcomparisonAudioProcessorEditor::startOSC() {
     // make sure to get rid of the (possibly) existing connection
     disconnect();
     juce::OSCReceiver::removeListener (this);
-    
+
     // connect only if the user wants so
     if (OSCEnabled) {
         connect(OSCPort);
