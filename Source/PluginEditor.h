@@ -67,6 +67,9 @@ private:
     ComboBox cbChannelSize;
     ComboBox cbNChoices;
     Slider slFadeTime;
+    ToggleButton tbEnableOSC;
+    Label lbOSCPortDescription;
+    TextEditor teOSCPort;
 
     int nChoices = 2;
 
@@ -85,6 +88,9 @@ private:
 
     bool editorIsResizing = false;
 
+    void startOSC();
+    void setOSCPort(const int);
+    bool OSCEnabled = true;
     int OSCPort = 8081;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)

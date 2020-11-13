@@ -70,7 +70,32 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     addAndMakeVisible (tbEditLabels);
     tbEditLabels.setButtonText ("Labels");
     tbEditLabels.onClick = [this] () { editLabels(); };
-
+    
+    addAndMakeVisible(tbEnableOSC);
+    tbEnableOSC.setButtonText("Enable OSC");
+    tbEnableOSC.setToggleState(OSCEnabled, dontSendNotification);
+    tbEnableOSC.onClick = [this] () { OSCEnabled = tbEnableOSC.getToggleState(); startOSC(); };
+    
+    addAndMakeVisible(lbOSCPortDescription);
+    lbOSCPortDescription.setText("OSC port", dontSendNotification);
+    lbOSCPortDescription.setEditable(false);
+    lbOSCPortDescription.attachToComponent(&teOSCPort, false);
+    addAndMakeVisible (teOSCPort);
+    teOSCPort.setMultiLine(false);
+    teOSCPort.setReturnKeyStartsNewLine(false);
+    teOSCPort.setReadOnly(false);
+    teOSCPort.setScrollbarsShown(true);
+    teOSCPort.setJustification(Justification::centred);
+    teOSCPort.setTooltip("The OSC port for receiving switch command. The command should be '/switch i', with i being the choice you want to play.");
+    teOSCPort.setText(String(OSCPort), dontSendNotification);
+    teOSCPort.onFocusLost = [this] () {
+        int currentPort = teOSCPort.getText().getIntValue();
+        if (currentPort != OSCPort) {
+            setOSCPort(currentPort);
+            startOSC();
+        }
+    };
+    
     flexBox.flexWrap = FlexBox::Wrap::wrap;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
 
@@ -95,9 +120,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 
     updateLabelText();
     startTimer (50);
-
-    connect(OSCPort);
-    juce::OSCReceiver::addListener(this, OSCAddress("/switch"));
+    startOSC();
 }
 
 AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()
@@ -162,6 +185,10 @@ void AbcomparisonAudioProcessorEditor::resized()
     slFadeTime.setBounds (settingsArea.removeFromLeft (110).withHeight (45));
     settingsArea.removeFromLeft (7);
     tbEditLabels.setBounds (settingsArea.removeFromLeft (75));
+    settingsArea.removeFromLeft(7);
+    tbEnableOSC.setBounds(settingsArea.removeFromLeft(80));
+    settingsArea.removeFromLeft(7);
+    teOSCPort.setBounds(settingsArea.removeFromLeft(70));
 
     bounds.removeFromTop (30);
 
@@ -268,6 +295,26 @@ void AbcomparisonAudioProcessorEditor::updateButtonSize()
     }
 
     flexBox.performLayout (flexBoxArea);
+}
+
+void AbcomparisonAudioProcessorEditor::startOSC() {
+    // make sure to get rid of the (possibly) existing connection
+    disconnect();
+    juce::OSCReceiver::removeListener(this);
+    
+    // connect only if the user wants so
+    if (OSCEnabled) {
+        connect(OSCPort);
+        juce::OSCReceiver::addListener(this, OSCAddress("/switch"));
+    }
+}
+
+void AbcomparisonAudioProcessorEditor::setOSCPort(int port) {
+    if (port < 1024) port = 1024;
+    if (port > 65535) port = 65535;
+    OSCPort = port;
+    // set the text in case user wanted to use an invalid port
+    teOSCPort.setText(String(OSCPort), dontSendNotification);
 }
 
 void AbcomparisonAudioProcessorEditor::oscMessageReceived(const OSCMessage& msg) {
