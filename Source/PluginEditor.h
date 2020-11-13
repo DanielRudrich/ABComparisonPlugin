@@ -91,7 +91,7 @@ private:
     void startOSC();
     void setOSCPort (int);
     bool OSCEnabled = true;
-    int OSCPort = 8081;
+    int OSCPort = 9222;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
 };
