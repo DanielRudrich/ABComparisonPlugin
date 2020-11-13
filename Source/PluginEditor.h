@@ -55,7 +55,7 @@ public:
     void updateLabelText();
     void updateButtonSize();
 
-    void oscMessageReceived(const OSCMessage&) override;
+    void oscMessageReceived (const OSCMessage&) override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -89,7 +89,7 @@ private:
     bool editorIsResizing = false;
 
     void startOSC();
-    void setOSCPort(const int);
+    void setOSCPort (int);
     bool OSCEnabled = true;
     int OSCPort = 8081;
 
