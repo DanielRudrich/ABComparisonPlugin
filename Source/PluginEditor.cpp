@@ -265,10 +265,10 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
 
 void AbcomparisonAudioProcessorEditor::editLabels()
 {
-    auto* settings = new SettingsComponent (processor);
+    auto settings = std::make_unique<SettingsComponent> (processor);
     settings->setSize (300, 250);
 
-    CallOutBox::launchAsynchronously (settings, tbEditLabels.getScreenBounds(), nullptr);
+    CallOutBox::launchAsynchronously (std::move (settings), tbEditLabels.getScreenBounds(), nullptr);
 }
 
 void AbcomparisonAudioProcessorEditor::updateLabelText()
