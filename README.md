@@ -11,12 +11,30 @@ The **fade-time** can be set to values between 0ms and 1000ms.
 **Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
 
 ## Download
-Compiled VST versions of the ABComparison plug-in for macOS and windows can be downloaded here: 
-- macOS: http://danielrudrich.de/plugins/ABComparison_macOS.zip
-- windows: http://danielrudrich.de/plugins/ABComparison_win_x64.zip
+You can find compiled plug-ins here: https://github.com/DanielRudrich/ABComparisonPlugin/actions (just check one of the latest workflows)
 
-**Note**: Those files might not be the most current version, better compile them yourself :-)
+For now the plug-in is only compiled for macOS, as I still have to set up the Github actions workflow for linux and windows as well. Will do so, I promise!
 
+So you might want to build the plug-ins yourself.
+
+## Compile the plug-in
+To build the ABComparison plug-in you need CMake and a build environment. This repository already comes with the JUCE framework.
+
+I recommend building the plug-in as a VST2 plug-in, the `CMakeLists.txt` is already configured for that. The only thing you need for that is the VST2 SDK. 
+```sh
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="/path/to/VST2SDK"
+make
+```
+
+If you don't have the VST2 SDK or can't get it, you still can build the plug-in as VST3: simply open the `CMakeLists.txt` and replace the `VST` with `VST3` within the `juce_add_plugin` call.
+```sh
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+```
 ## Edit labels and button sizes
 Click on the 'labels' button to edit the text on the buttons and their sizes. Separate the individual labels by new lines. If you don't define as many labels as buttons, the remaining buttons will be numbered.
 
