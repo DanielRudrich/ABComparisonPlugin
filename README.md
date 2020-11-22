@@ -7,6 +7,7 @@ There are **two switching modes**: the *exclusive solo* mode and *toggle mode*. 
 The **fade-time** can be set to values between 0ms and 1000ms.
 
 **New with version 1.3.0**: The button size and displayed text labels are now customizable! 
+
 **Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
 
 ## Download
