@@ -123,6 +123,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     updateLabelText();
     startTimer (50);
     processor.getOSCReceiver().addChangeListener (this);
+    changeListenerCallback (nullptr);
 }
 
 AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()
