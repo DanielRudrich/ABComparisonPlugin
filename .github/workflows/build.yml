@@ -25,4 +25,7 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="FST/"
           make
-        
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ABComparison_macOS
+          path: build/ABComparison_artefacts/Release/VST/ABComparison.vst
