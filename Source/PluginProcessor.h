@@ -26,13 +26,16 @@
  */
 
 #pragma once
-
+#include "OSCReceiverPlus.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessor  : public AudioProcessor, private AudioProcessorValueTreeState::Listener
+class AbcomparisonAudioProcessor :
+public AudioProcessor,
+private AudioProcessorValueTreeState::Listener,
+private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
     //==============================================================================
@@ -78,6 +81,10 @@ public:
     void parameterChanged (const String &parameterID, float newValue) override;
     void muteAllOtherChoices (const int choiceNotToMute);
 
+    //==============================================================================
+    void oscMessageReceived (const OSCMessage&) override;
+
+
     // === public flag for editor, signaling to resize window
     Atomic<bool> resizeEditorWindow = false;
     Atomic<bool> updateLabelText = false;
@@ -93,10 +100,14 @@ public:
     void setButtonSize (int newSize);
     const int getButtonSize() { return buttonSize.get(); };
 
+    OSCReceiverPlus& getOSCReceiver() noexcept { return oscReceiver; }
+
 private:
     AudioProcessorValueTreeState parameters;
     AudioProcessorValueTreeState::ParameterLayout createParameters();
     LinearSmoothedValue<float> gains[maxNChoices];
+
+    OSCReceiverPlus oscReceiver;
 
     std::atomic<float>* numberOfChoices;
     std::atomic<float>* switchMode;
@@ -107,7 +118,6 @@ private:
 
     String labelText = "";
     Atomic<int> buttonSize = 120;
-
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessor)

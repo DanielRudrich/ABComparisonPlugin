@@ -35,7 +35,8 @@ AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
                      #endif
                        ),
 #endif
-parameters (*this, nullptr, "ABComparison", createParameters())
+parameters (*this, nullptr, "ABComparison", createParameters()),
+oscReceiver (9222)
 {
     for (int choice = 0; choice < maxNChoices; ++choice)
     {
@@ -49,6 +50,11 @@ parameters (*this, nullptr, "ABComparison", createParameters())
     switchMode = parameters.getRawParameterValue ("switchMode");
     fadeTime = parameters.getRawParameterValue ("fadeTime");
     numberOfChoices = parameters.getRawParameterValue ("numberOfChoices");
+
+    oscReceiver.addListener (this, OSCAddress ("/switch"));
+
+//    if (port < 1024) port = 1024;
+//    if (port > 65535) port = 65535;
 }
 
 
@@ -265,6 +271,25 @@ void AbcomparisonAudioProcessor::muteAllOtherChoices (const int choiceNotToMute)
         if (i != choiceNotToMute)
             parameters.getParameter ("choiceState" + String (i))->setValueNotifyingHost (0.0f);
 }
+
+
+void AbcomparisonAudioProcessor::oscMessageReceived (const OSCMessage& msg)
+{
+    for (auto& arg : msg)
+    {
+        if (arg.isInt32())
+        {
+            if (const auto choice = arg.getInt32(); choice >= 0 && choice < maxNChoices)
+            {
+                if (choiceStates[choice]->load() == 1.0f)
+                    parameterChanged ("choiceState" + String (choice), 0.0f);
+                else
+                    parameterChanged ("choiceState" + String (choice), 1.0f);
+            }
+        }
+    }
+}
+
 
 AudioProcessorValueTreeState::ParameterLayout AbcomparisonAudioProcessor::createParameters()
 {
