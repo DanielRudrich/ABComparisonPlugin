@@ -25,7 +25,9 @@ jobs:
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="FST/"
           make
+      - name: Zip it
+        run:  zip -r ABComparison_macOS.zip  build/ABComparison_artefacts/Release/VST/ABComparison.vst
       - uses: actions/upload-artifact@v1
         with:
           name: ABComparison_macOS
-          path: build/ABComparison_artefacts/Release/VST/ABComparison.vst
+          path: ABComparison_macOS.zip
