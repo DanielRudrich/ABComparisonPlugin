@@ -34,7 +34,7 @@ Click on the 'labels' button to edit the text on the buttons and their sizes. Se
 ## OSC support
 You can use OSC messages to switch inputs. Per default, the plugin listens to port 9222. You can change the port on the plugin GUI. In the GUI you can also enable or disable receiving OSC messages. The plugin expects messages in form `/switch i`, where i is the index of the input. The indexing starts at 1. So in order to select the third choice -> `/switch 3`. You can also toggle several choices at once, which is usefull in ToggleMode: `/switch 1 3 4`
 
-Made with the [JUCE framework](http://github.com/weareroli/juce/)
+Made with the [JUCE framework](https://github.com/juce-framework/JUCE)
 
 ![](screenshot.png)
 
