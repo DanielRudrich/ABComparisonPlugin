@@ -11,11 +11,11 @@ The **fade-time** can be set to values between 0ms and 1000ms.
 **Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
 
 ## Download
-Compiled VST versions of the ABComparison plug-in for macOS and windows can be downloaded here: 
-- macOS: http://danielrudrich.de/plugins/ABComparison_macOS.zip
-- windows: http://danielrudrich.de/plugins/ABComparison_win_x64.zip
+You can find compiled plug-ins here: https://github.com/DanielRudrich/ABComparisonPlugin/actions (just check one of the latest workflows)
 
-**Note**: Those files might not be the most current version, better compile them yourself :-)
+For now the plug-in is only compiled for macOS, as I still have to set up the Github actions workflow for linux and windows as well. Will do so, I promise!
+
+So you might want to build the plug-ins yourself.
 
 ## Compile the plug-in
 To build the ABComparison plug-in you need CMake and a build environment. This repository already comes with the JUCE framework.

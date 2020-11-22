@@ -10,6 +10,7 @@
 # Folders
 #########
 
-/Builds
-/JuceLibraryCode
-/build
+Builds
+JuceLibraryCode
+build
+FST
