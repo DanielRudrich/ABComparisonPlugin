@@ -52,9 +52,6 @@ oscReceiver (9222)
     numberOfChoices = parameters.getRawParameterValue ("numberOfChoices");
 
     oscReceiver.addListener (this, OSCAddress ("/switch"));
-
-//    if (port < 1024) port = 1024;
-//    if (port > 65535) port = 65535;
 }
 
 
@@ -277,15 +274,22 @@ void AbcomparisonAudioProcessor::oscMessageReceived (const OSCMessage& msg)
 {
     for (auto& arg : msg)
     {
+        int choice;
         if (arg.isInt32())
+            choice = arg.getInt32();
+        else if (arg.isFloat32())
+            choice = arg.getFloat32();
+        else
+            continue;
+
+        if (choice >= 0 && choice < maxNChoices)
         {
-            if (const auto choice = arg.getInt32(); choice >= 0 && choice < maxNChoices)
-            {
-                if (choiceStates[choice]->load() == 1.0f)
-                    parameterChanged ("choiceState" + String (choice), 0.0f);
-                else
-                    parameterChanged ("choiceState" + String (choice), 1.0f);
-            }
+            auto param = parameters.getParameter ("choiceState" + String (choice));
+            
+            if (param->getValue() > 0.5f)
+                param->setValueNotifyingHost (0.0f);
+            else
+                param->setValueNotifyingHost (1.0f);
         }
     }
 }
