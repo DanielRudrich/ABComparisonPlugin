@@ -37,6 +37,13 @@ public AudioProcessor,
 private AudioProcessorValueTreeState::Listener,
 private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
+    static const juce::Identifier EditorWidth;
+    static const juce::Identifier EditorHeight;
+    static const juce::Identifier OSCPort;
+    static const juce::Identifier OSCEnabled;
+    static const juce::Identifier LabelText;
+    static const juce::Identifier ButtonSize;
+    
 public:
     //==============================================================================
     static constexpr int maxNChoices = 32;

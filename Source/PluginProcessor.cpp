@@ -23,6 +23,13 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+const juce::Identifier AbcomparisonAudioProcessor::OSCPort = "OSCPort";
+const juce::Identifier AbcomparisonAudioProcessor::OSCEnabled = "OSCEnabled";
+const juce::Identifier AbcomparisonAudioProcessor::EditorWidth = "editorWidth";
+const juce::Identifier AbcomparisonAudioProcessor::EditorHeight = "editorHeight";
+const juce::Identifier AbcomparisonAudioProcessor::LabelText = "labelText";
+const juce::Identifier AbcomparisonAudioProcessor::ButtonSize = "buttonSize";
+
 //==============================================================================
 AbcomparisonAudioProcessor::AbcomparisonAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -207,6 +214,8 @@ AudioProcessorEditor* AbcomparisonAudioProcessor::createEditor()
 void AbcomparisonAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     auto state = parameters.copyState();
+    state.setProperty (OSCPort, oscReceiver.getPortNumber(), nullptr);
+    state.setProperty (OSCEnabled, oscReceiver.getAutoConnect(), nullptr);
     std::unique_ptr<XmlElement> xml (state.createXml());
     copyXmlToBinary (*xml, destData);
 }
@@ -218,18 +227,24 @@ void AbcomparisonAudioProcessor::setStateInformation (const void* data, int size
         if (xmlState->hasTagName (parameters.state.getType()))
         {
             parameters.replaceState (ValueTree::fromXml (*xmlState));
-            if (parameters.state.hasProperty ("editorWidth") && parameters.state.hasProperty ("editorHeight"))
+            if (parameters.state.hasProperty (EditorWidth) && parameters.state.hasProperty (EditorHeight))
             {
-                editorWidth = parameters.state.getProperty ("editorWidth");
-                editorHeight = parameters.state.getProperty ("editorHeight");
+                editorWidth = parameters.state.getProperty (EditorWidth);
+                editorHeight = parameters.state.getProperty (EditorHeight);
                 resizeEditorWindow = true;
             }
 
-            if (parameters.state.hasProperty ("labelText"))
-                setLabelText (parameters.state.getProperty ("labelText"));
+            if (parameters.state.hasProperty (LabelText))
+                setLabelText (parameters.state.getProperty (LabelText));
 
-            if (parameters.state.hasProperty ("buttonSize"))
-                setButtonSize (parameters.state.getProperty ("buttonSize"));
+            if (parameters.state.hasProperty (ButtonSize))
+                setButtonSize (parameters.state.getProperty (ButtonSize));
+
+            if (parameters.state.hasProperty (OSCPort))
+                oscReceiver.setPort (parameters.state.getProperty (OSCPort));
+
+            if (parameters.state.hasProperty (OSCEnabled))
+                oscReceiver.setAutoConnect (parameters.state.getProperty (OSCEnabled));
         }
 }
 
@@ -339,8 +354,8 @@ void AbcomparisonAudioProcessor::setEditorSize (int width, int height)
     editorHeight = height;
     DBG ("Editor called setEditorSize: " << width << "x" << height);
 
-    parameters.state.setProperty ("editorWidth", width, nullptr);
-    parameters.state.setProperty ("editorHeight", height, nullptr);
+    parameters.state.setProperty (EditorWidth, width, nullptr);
+    parameters.state.setProperty (EditorHeight, height, nullptr);
 }
 
 // This creates new instances of the plugin..
@@ -353,7 +368,7 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 void AbcomparisonAudioProcessor::setLabelText (String newLabelText)
 {
     labelText = newLabelText;
-    parameters.state.setProperty ("labelText", labelText, nullptr);
+    parameters.state.setProperty (LabelText, labelText, nullptr);
 
     updateLabelText = true;
 }
@@ -363,7 +378,7 @@ void AbcomparisonAudioProcessor::setButtonSize (int newSize)
 {
     DBG ("setButtonSize");
     buttonSize = newSize;
-    parameters.state.setProperty ("buttonSize", newSize, nullptr);
+    parameters.state.setProperty (ButtonSize, newSize, nullptr);
 
     updateButtonSize = true;
 }
