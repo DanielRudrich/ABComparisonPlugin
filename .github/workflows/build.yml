@@ -1,7 +1,7 @@
 name: BuildPlugin
 on:
   push:
-    branches: [ci]
+    branches: [master]
 jobs:
   macos:
     runs-on: macOS-latest
