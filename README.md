@@ -8,10 +8,14 @@ The **fade-time** can be set to values between 0ms and 1000ms.
 
 **New with version 1.3.0**: The button size and displayed text labels are now customizable! 
 
+**Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
+
 ## Download
-Compiled VST versions of the ABComparison plug-in for macOS and windows can be downloaded here:
+Compiled VST versions of the ABComparison plug-in for macOS and windows can be downloaded here: 
 - macOS: http://danielrudrich.de/plugins/ABComparison_macOS.zip
 - windows: http://danielrudrich.de/plugins/ABComparison_win_x64.zip
+
+**Note**: Those files might not be the most current version, better compile them yourself :-)
 
 ## Edit labels and button sizes
 Click on the 'labels' button to edit the text on the buttons and their sizes. Separate the individual labels by new lines. If you don't define as many labels as buttons, the remaining buttons will be numbered.
@@ -27,8 +31,10 @@ Click on the 'labels' button to edit the text on the buttons and their sizes. Se
  - select one of the coices
  - output will be routed to the first 6 output channels
 
+## OSC support
+You can use OSC messages to switch inputs. Per default, the plugin listens to port 9222. You can change the port on the plugin GUI. In the GUI you can also enable or disable receiving OSC messages. The plugin expects messages in form `/switch i`, where i is the index of the input. The indexing starts at 1. So in order to select the third choice -> `/switch 3`. You can also toggle several choices at once, which is usefull in ToggleMode: `/switch 1 3 4`
 
-Made with the [JUCE framework](http://github.com/weareroli/juce/)
+Made with the [JUCE framework](https://github.com/juce-framework/JUCE)
 
 ![](screenshot.png)
 

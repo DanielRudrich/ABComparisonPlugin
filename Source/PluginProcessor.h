@@ -26,14 +26,24 @@
  */
 
 #pragma once
-
+#include "OSCReceiverPlus.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessor  : public AudioProcessor, private AudioProcessorValueTreeState::Listener
+class AbcomparisonAudioProcessor :
+public AudioProcessor,
+private AudioProcessorValueTreeState::Listener,
+private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
+    static const juce::Identifier EditorWidth;
+    static const juce::Identifier EditorHeight;
+    static const juce::Identifier OSCPort;
+    static const juce::Identifier OSCEnabled;
+    static const juce::Identifier LabelText;
+    static const juce::Identifier ButtonSize;
+    
 public:
     //==============================================================================
     static constexpr int maxNChoices = 32;
@@ -78,14 +88,18 @@ public:
     void parameterChanged (const String &parameterID, float newValue) override;
     void muteAllOtherChoices (const int choiceNotToMute);
 
+    //==============================================================================
+    void oscMessageReceived (const OSCMessage&) override;
+
+
     // === public flag for editor, signaling to resize window
-    Atomic<bool> resizeEditorWindow = false;
-    Atomic<bool> updateLabelText = false;
-    Atomic<bool> updateButtonSize = false;
+    std::atomic<bool> resizeEditorWindow = false;
+    std::atomic<bool> updateLabelText = false;
+    std::atomic<bool> updateButtonSize = false;
     void setEditorSize (int width, int height);
-    Atomic<int> editorWidth = 740;
-    Atomic<int> editorHeight = 300;
-    Atomic<bool> numberOfChoicesHasChanged = false;
+    std::atomic<int> editorWidth = 740;
+    std::atomic<int> editorHeight = 300;
+    std::atomic<bool> numberOfChoicesHasChanged = false;
 
     void setLabelText (String labelText);
     const String getLabelText() { return labelText; };
@@ -93,10 +107,14 @@ public:
     void setButtonSize (int newSize);
     const int getButtonSize() { return buttonSize.get(); };
 
+    OSCReceiverPlus& getOSCReceiver() noexcept { return oscReceiver; }
+
 private:
     AudioProcessorValueTreeState parameters;
     AudioProcessorValueTreeState::ParameterLayout createParameters();
     LinearSmoothedValue<float> gains[maxNChoices];
+
+    OSCReceiverPlus oscReceiver;
 
     std::atomic<float>* numberOfChoices;
     std::atomic<float>* switchMode;
@@ -107,7 +125,6 @@ private:
 
     String labelText = "";
     Atomic<int> buttonSize = 120;
-
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessor)

@@ -1,5 +1,5 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
  ABComparison Plug-in
  Copyright (C) 2018 - Daniel Rudrich
@@ -17,15 +17,15 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
 //==============================================================================
 AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p, AudioProcessorValueTreeState& vts)
-    : AudioProcessorEditor (&p), processor (p), parameters (vts)
+: AudioProcessorEditor (&p), processor (p), parameters (vts)
 {
     toolTipWin.setMillisecondsBeforeTipAppears (200);
     toolTipWin.setOpaque (false);
@@ -71,6 +71,32 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     tbEditLabels.setButtonText ("Labels");
     tbEditLabels.onClick = [this] () { editLabels(); };
 
+    addAndMakeVisible (tbEnableOSC);
+    tbEnableOSC.setButtonText ("");
+    tbEnableOSC.setTooltip ("Enables/disables OSC");
+    tbEnableOSC.setToggleState (p.getOSCReceiver().getAutoConnect(), dontSendNotification);
+    tbEnableOSC.onClick = [&] ()
+    {
+        const auto enable = tbEnableOSC.getToggleState();
+        p.getOSCReceiver().setAutoConnect (enable);
+        if (! enable)
+            p.getOSCReceiver().disconnect();
+    };
+
+    addAndMakeVisible (teOSCPort);
+    teOSCPort.setMultiLine (false);
+    teOSCPort.setReturnKeyStartsNewLine (false);
+    teOSCPort.setReadOnly (false);
+    teOSCPort.setScrollbarsShown (true);
+    teOSCPort.setJustification (Justification::centred);
+    teOSCPort.setTooltip ("The OSC port for receiving switch command. The command should be '/switch i', with i being the choice you want to play.");
+    teOSCPort.setText (String (p.getOSCReceiver().getPortNumber()), dontSendNotification);
+    teOSCPort.onReturnKey = [&] ()
+    {
+        const int currentPort = teOSCPort.getText().getIntValue();
+        p.getOSCReceiver().setPort (currentPort);
+    };
+
     flexBox.flexWrap = FlexBox::Wrap::wrap;
     flexBox.alignContent = FlexBox::AlignContent::flexStart;
 
@@ -83,6 +109,7 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
         handle->setClickingTogglesState (true);
         handle->setColour (TextButton::buttonOnColourId, cols[choice % cols.size()]);
     }
+
     updateNumberOfButtons();
 
 
@@ -90,15 +117,18 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     {
         ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
         setResizeLimits (460, 300, 1440, 700);
-        setSize (jmin (processor.editorWidth.get(), 1440), jmin (processor.editorHeight.get(), 700));
+        setSize (jmin (processor.editorWidth.load(), 1440), jmin (processor.editorHeight.load(), 700));
     }
 
     updateLabelText();
     startTimer (50);
+    processor.getOSCReceiver().addChangeListener (this);
+    changeListenerCallback (nullptr);
 }
 
 AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()
 {
+    processor.getOSCReceiver().removeChangeListener (this);
 }
 
 //==============================================================================
@@ -140,6 +170,9 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
     g.drawText ("Switch mode", headlineRow.removeFromLeft (110), Justification::centred, 1);
     headlineRow.removeFromLeft (7);
     g.drawText ("FadeTime", headlineRow.removeFromLeft (120), Justification::centred, 1);
+    headlineRow.removeFromLeft (7 + 75 + 10);
+    g.drawText ("OSC", headlineRow.removeFromLeft (26), Justification::left, 1);
+    g.drawText ("Port", headlineRow.removeFromLeft (70), Justification::centred, 1);
 }
 
 void AbcomparisonAudioProcessorEditor::resized()
@@ -159,6 +192,9 @@ void AbcomparisonAudioProcessorEditor::resized()
     slFadeTime.setBounds (settingsArea.removeFromLeft (110).withHeight (45));
     settingsArea.removeFromLeft (7);
     tbEditLabels.setBounds (settingsArea.removeFromLeft (75));
+    settingsArea.removeFromLeft (10);
+    tbEnableOSC.setBounds (settingsArea.removeFromLeft (26));
+    teOSCPort.setBounds (settingsArea.removeFromLeft (70));
 
     bounds.removeFromTop (30);
 
@@ -190,10 +226,9 @@ void AbcomparisonAudioProcessorEditor::updateNumberOfButtons()
         tbChoice.getUnchecked (choice)->setVisible (true);
         flexBox.items.add (FlexItem (size, size, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
     }
+
     for (int choice = nChoices; choice < processor.maxNChoices; ++choice)
-    {
         tbChoice.getUnchecked (choice)->setVisible (false);
-    }
 
     repaint();
 }
@@ -203,39 +238,47 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
     if (cbNChoices.getSelectedId() + 1 != nChoices)
         updateNumberOfButtons();
 
-    if (processor.resizeEditorWindow.get())
+    if (processor.resizeEditorWindow.exchange (false))
     {
         ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
-        setSize (processor.editorWidth.get(), processor.editorHeight.get());
-        processor.resizeEditorWindow = false;
+        setSize (processor.editorWidth.load(), processor.editorHeight.load());
     }
 
-    if (processor.numberOfChoicesHasChanged.get())
+    if (processor.numberOfChoicesHasChanged.exchange (false))
     {
         updateNumberOfButtons();
         resized();
-        processor.numberOfChoicesHasChanged = false;
     }
 
-    if (processor.updateLabelText.get())
-    {
+    if (processor.updateLabelText.exchange (false))
         updateLabelText();
-        processor.updateLabelText = false;
-    }
 
-    if (processor.updateButtonSize.get())
-    {
+    if (processor.updateButtonSize.exchange (false))
         updateButtonSize();
-        processor.updateButtonSize = false;
-    }
 }
+
+void AbcomparisonAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster *source)
+{
+    if (processor.getOSCReceiver().getAutoConnect())
+    {
+        if (processor.getOSCReceiver().isConnected())
+            teOSCPort.setColour (TextEditor::outlineColourId, Colours::green);
+        else
+            teOSCPort.setColour (TextEditor::outlineColourId, Colours::red);
+    }
+    else
+        teOSCPort.setColour (TextEditor::outlineColourId, getLookAndFeel().findColour (TextEditor::outlineColourId));
+
+    teOSCPort.repaint();
+}
+
 
 void AbcomparisonAudioProcessorEditor::editLabels()
 {
-    auto* settings = new SettingsComponent (processor);
+    auto settings = std::make_unique<SettingsComponent> (processor);
     settings->setSize (300, 250);
 
-    CallOutBox::launchAsynchronously (settings, tbEditLabels.getScreenBounds(), nullptr);
+    CallOutBox::launchAsynchronously (std::move (settings), tbEditLabels.getScreenBounds(), nullptr);
 }
 
 void AbcomparisonAudioProcessorEditor::updateLabelText()
