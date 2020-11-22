@@ -18,7 +18,7 @@ jobs:
           unzip FST-master.zip
           mv FST-master pluginterfaces
           mv pluginterfaces/fst pluginterfaces/vst2.x
-          print "Hello Steinberg, if you don't like this, please bring back discrete loudspeaker layouts."
+          echo "Hello Steinberg, if you don't like this, please bring back discrete loudspeaker layouts."
       - name: Build that thing
         run: |
           mkdir build
