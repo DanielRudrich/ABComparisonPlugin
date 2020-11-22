@@ -8,6 +8,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: CmakeTest
-        run: cmake --version
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Grab FST
+        run: |
+          mkdir FST
+          cd FST
+          curl -O https://git.iem.at/zmoelnig/FST/-/archive/master/FST-master.zip
+          unzip FST-master.zip
+          mv FST-master pluginterfaces
+          mv pluginterfaces/fst pluginterfaces/vst2.x
+          print "Hello Steinberg, if you don't like this, please bring back discrete loudspeaker layouts."
+      - name: Build that thing
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="FST/"
+          make
         
