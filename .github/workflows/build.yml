@@ -1,0 +1,13 @@
+name: BuildPlugin
+on:
+  push:
+    branches: [ci]
+jobs:
+  macos:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: CmakeTest
+        run: cmake --version
+        
