@@ -27,6 +27,9 @@ Click on the 'labels' button to edit the text on the buttons and their sizes. Se
  - select one of the coices
  - output will be routed to the first 6 output channels
 
+## OSC support
+
+You can use OSC messages to switch inputs. Per default, the plugin listens to port 9222. You can change the port on the plugin GUI. In the GUI you can also enable or disable receiving OSC messages. The plugin expects messages in form `/switch i`, where i is the index of the input. The indexing starts at 0.
 
 Made with the [JUCE framework](http://github.com/weareroli/juce/)
 

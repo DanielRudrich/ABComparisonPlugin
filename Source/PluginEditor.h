@@ -33,7 +33,11 @@ typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor, public KeyListener, private Timer
+class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor,
+    public KeyListener,
+    private Timer,
+    private OSCReceiver,
+    private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>
 {
 public:
     AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, AudioProcessorValueTreeState&);
@@ -51,6 +55,8 @@ public:
     void updateLabelText();
     void updateButtonSize();
 
+    void oscMessageReceived (const OSCMessage&) override;
+
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
@@ -61,6 +67,9 @@ private:
     ComboBox cbChannelSize;
     ComboBox cbNChoices;
     Slider slFadeTime;
+    ToggleButton tbEnableOSC;
+    Label lbOSCPortDescription;
+    TextEditor teOSCPort;
 
     int nChoices = 2;
 
@@ -78,6 +87,11 @@ private:
     TooltipWindow toolTipWin;
 
     bool editorIsResizing = false;
+
+    void startOSC();
+    void setOSCPort (int);
+    bool OSCEnabled = true;
+    int OSCPort = 9222;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbcomparisonAudioProcessorEditor)
 };
