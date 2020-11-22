@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /** An extension to JUCE's OSCReceiver class with some useful methods.
 */
-class OSCReceiverPlus : public OSCReceiver
+class OSCReceiverPlus : public OSCReceiver, public ChangeBroadcaster
 {
 public:
     OSCReceiverPlus (int defaultPort = -1, bool shouldAutoConnect = false)
@@ -42,6 +42,8 @@ public:
     {
         if (autoConnect.exchange (shouldAutoConnect) != shouldAutoConnect && shouldAutoConnect)
             connect();
+        else
+            sendChangeMessage();
     }
 
     bool getAutoConnect() const
@@ -55,6 +57,8 @@ public:
         DBG ("OSC: Port set to " << port);
         if (autoConnect.load())
             connect();
+        else
+            sendChangeMessage();
     }
 
     bool connect()
@@ -66,15 +70,23 @@ public:
             return true;
         }
 
+        if (! isPositiveAndBelow (port, 65536))
+        {
+            sendChangeMessage();
+            return false;
+        }
+
         if (OSCReceiver::connect (port))
         {
             DBG ("OSC: Successfully opened port " << port);
             connected = true;
+            sendChangeMessage();
             return true;
         }
         else
         {
             DBG ("OSC: Failed opening port " << port);
+            sendChangeMessage();
             return false;
         }
     }
@@ -85,6 +97,7 @@ public:
         {
             DBG ("OSC: disconnected!");
             connected = false;
+            sendChangeMessage();
             return true;
         }
         else

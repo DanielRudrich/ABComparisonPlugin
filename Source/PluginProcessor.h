@@ -93,13 +93,13 @@ public:
 
 
     // === public flag for editor, signaling to resize window
-    Atomic<bool> resizeEditorWindow = false;
-    Atomic<bool> updateLabelText = false;
-    Atomic<bool> updateButtonSize = false;
+    std::atomic<bool> resizeEditorWindow = false;
+    std::atomic<bool> updateLabelText = false;
+    std::atomic<bool> updateButtonSize = false;
     void setEditorSize (int width, int height);
-    Atomic<int> editorWidth = 740;
-    Atomic<int> editorHeight = 300;
-    Atomic<bool> numberOfChoicesHasChanged = false;
+    std::atomic<int> editorWidth = 740;
+    std::atomic<int> editorHeight = 300;
+    std::atomic<bool> numberOfChoicesHasChanged = false;
 
     void setLabelText (String labelText);
     const String getLabelText() { return labelText; };
