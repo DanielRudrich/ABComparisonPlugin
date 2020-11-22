@@ -297,6 +297,8 @@ void AbcomparisonAudioProcessor::oscMessageReceived (const OSCMessage& msg)
         else
             continue;
 
+        choice -= 1; // for `1` changing the first one
+        
         if (choice >= 0 && choice < maxNChoices)
         {
             auto param = parameters.getParameter ("choiceState" + String (choice));
