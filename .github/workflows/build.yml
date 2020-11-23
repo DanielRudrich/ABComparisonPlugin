@@ -19,7 +19,8 @@ jobs:
           Expand-Archive FST-master.zip -DestinationPath .
           dir
           Rename-Item FST-master pluginterfaces
-          Rename-Item pluginterfaces/fst pluginterfaces/vst2.x
+          cd pluginterfaces
+          Rename-Item fst vst2.x
 
       - name: Build that thing
         run: |
