@@ -21,12 +21,14 @@ jobs:
           Rename-Item FST-master pluginterfaces
           cd pluginterfaces
           Rename-Item fst vst2.x
+          cd vst2.x
+          (Get-Content fst.h).replace('__declspec(deprecated) x', '[[deprecated]]') | Set-Content fst.h
 
       - name: Build that thing
         run: |
           mkdir build
           cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="FST/"
+          cmake .. -DVST2PATH="FST/"
           cmake --build . --target install --config Release
       - name: Zip it
         shell: powershell
