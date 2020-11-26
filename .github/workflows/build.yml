@@ -21,8 +21,6 @@ jobs:
           Rename-Item FST-master pluginterfaces
           cd pluginterfaces
           Rename-Item fst vst2.x
-          cd vst2.x
-          (Get-Content fst.h).replace('__declspec(deprecated) x', '[[deprecated]]') | Set-Content fst.h
 
       - name: Build that thing
         run: |
@@ -32,7 +30,7 @@ jobs:
           cmake --build . --target install --config Release
       - name: Zip it
         shell: powershell
-        run:  | 
+        run:  |
           cd build/ABComparison_artefacts/Release/VST
           ls
           Compress-Archive -Path ABComparison.dll -DestinationPath ABComparison_win.zip
@@ -40,3 +38,34 @@ jobs:
         with:
           name: ABComparison_win
           path: build/ABComparison_artefacts/Release/VST/ABComparison_win.zip
+
+  macos:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Grab FST
+        run: |
+          mkdir FST
+          cd FST
+          curl -O https://git.iem.at/zmoelnig/FST/-/archive/master/FST-master.zip
+          unzip FST-master.zip
+          mv FST-master pluginterfaces
+          mv pluginterfaces/fst pluginterfaces/vst2.x
+          echo "Hello Steinberg, if you don't like this, please bring back discrete loudspeaker layouts."
+      - name: Build that thing
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="FST/"
+          make
+      - name: Zip it
+        run:  |
+          cd build/ABComparison_artefacts/Release/VST
+          zip -r ABComparison_macOS.zip ABComparison.vst
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ABComparison_macOS
+          path: build/ABComparison_artefacts/Release/VST/ABComparison_macOS.zip
