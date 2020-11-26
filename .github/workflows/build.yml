@@ -3,6 +3,42 @@ on:
   push:
     branches: [master]
 jobs:
+  win:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Grab FST
+        shell: powershell
+        run: |
+          mkdir FST
+          cd FST
+          Invoke-WebRequest https://git.iem.at/zmoelnig/FST/-/archive/master/FST-master.zip -OutFile FST-master.zip
+          Expand-Archive FST-master.zip -DestinationPath .
+          dir
+          Rename-Item FST-master pluginterfaces
+          cd pluginterfaces
+          Rename-Item fst vst2.x
+
+      - name: Build that thing
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DVST2PATH="FST/"
+          cmake --build . --target install --config Release
+      - name: Zip it
+        shell: powershell
+        run:  |
+          cd build/ABComparison_artefacts/Release/VST
+          ls
+          Compress-Archive -Path ABComparison.dll -DestinationPath ABComparison_win.zip
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ABComparison_win
+          path: build/ABComparison_artefacts/Release/VST/ABComparison_win.zip
+
   macos:
     runs-on: macOS-latest
     steps:
@@ -26,7 +62,7 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="FST/"
           make
       - name: Zip it
-        run:  | 
+        run:  |
           cd build/ABComparison_artefacts/Release/VST
           zip -r ABComparison_macOS.zip ABComparison.vst
       - uses: actions/upload-artifact@v1

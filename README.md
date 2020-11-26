@@ -11,13 +11,10 @@ The **fade-time** can be set to values between 0ms and 1000ms.
 **Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
 
 ## Download
-You can find compiled plug-ins here: https://github.com/DanielRudrich/ABComparisonPlugin/actions (just check one of the latest workflows)
+You can find compiled plug-ins here: https://github.com/DanielRudrich/ABComparisonPlugin/actions (just check one of the latest workflows).
+Some day, I will create some Releases, but this does the job in the meantime.
 
-For now the plug-in is only compiled for macOS, as I still have to set up the Github actions workflow for linux and windows as well. Will do so, I promise!
-
-So you might want to build the plug-ins yourself.
-
-## Compile the plug-in
+## Compile the plug-in yourself
 To build the ABComparison plug-in you need CMake and a build environment. This repository already comes with the JUCE framework.
 
 I recommend building the plug-in as a VST2 plug-in, the `CMakeLists.txt` is already configured for that. The only thing you need for that is the VST2 SDK. 
@@ -28,7 +25,7 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="/path/to/VST2SDK"
 make
 ```
 
-If you don't have the VST2 SDK or can't get it, you still can build the plug-in as VST3: simply open the `CMakeLists.txt` and replace the `VST` with `VST3` within the `juce_add_plugin` call.
+If you don't have the VST2 SDK or can't get it, you still can build the plug-in as VST3: simply open the `CMakeLists.txt` and replace the `VST` with `VST3` within the `juce_add_plugin` call. However, VST3 has a little problem with so many channels. So in most DAWs you can only get 24 channels, instead of 64 like with VST...
 ```sh
 mkdir build
 cd build
