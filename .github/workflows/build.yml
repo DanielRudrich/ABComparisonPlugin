@@ -1,7 +1,7 @@
 name: BuildPlugin
 on:
   push:
-    branches: [win-ci]
+    branches: [master]
 jobs:
   win:
     runs-on: windows-2019
