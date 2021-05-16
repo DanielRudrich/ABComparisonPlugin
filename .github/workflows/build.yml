@@ -2,6 +2,8 @@ name: BuildPlugin
 on:
   push:
     branches: [master]
+  workflow_dispatch:
+    branches: [master]
 jobs:
   win:
     runs-on: windows-2019
