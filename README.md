@@ -11,8 +11,7 @@ The **fade-time** can be set to values between 0ms and 1000ms.
 **Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
 
 ## Download
-You can find compiled plug-ins here: https://github.com/DanielRudrich/ABComparisonPlugin/actions (just check one of the latest workflows).
-Some day, I will create some Releases, but this does the job in the meantime.
+Binaries for windows and macOS are available here: [Releases](https://github.com/DanielRudrich/ABComparisonPlugin/releases).
 
 ## Compile the plug-in yourself
 To build the ABComparison plug-in you need CMake and a build environment. This repository already comes with the JUCE framework.
