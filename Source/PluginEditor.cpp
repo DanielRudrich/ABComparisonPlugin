@@ -210,9 +210,11 @@ bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress &key, Componen
     auto choice = key.getKeyCode() - 49;
     if (choice == - 1)
         choice = 9;
-    if (choice >= 0 && choice < jmin (nChoices, 10))
+    if (choice >= 0 && choice < jmin (nChoices, 10)) {
         tbChoice.getUnchecked (choice)->triggerClick();
-    return true;
+        return true;
+    }
+    return false;
 }
 
 void AbcomparisonAudioProcessorEditor::updateNumberOfButtons()
