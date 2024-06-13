@@ -20,12 +20,14 @@
  ==============================================================================
  */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
-AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor& p, AudioProcessorValueTreeState& vts)
-: AudioProcessorEditor (&p), processor (p), parameters (vts)
+AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (
+    AbcomparisonAudioProcessor& p,
+    AudioProcessorValueTreeState& vts) :
+    AudioProcessorEditor (&p), processor (p), parameters (vts)
 {
     toolTipWin.setMillisecondsBeforeTipAppears (200);
     toolTipWin.setOpaque (false);
@@ -58,8 +60,8 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     for (int i = 1; i <= 32; ++i)
         cbChannelSize.addItem (String (i) + " ch", i);
 
-    cbChannelSizeAttachment.reset (new ComboBoxAttachment (parameters, "channelSize", cbChannelSize));
-
+    cbChannelSizeAttachment.reset (
+        new ComboBoxAttachment (parameters, "channelSize", cbChannelSize));
 
     addAndMakeVisible (slFadeTime);
     slFadeTimeAttachment.reset (new SliderAttachment (parameters, "fadeTime", slFadeTime));
@@ -69,13 +71,13 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
 
     addAndMakeVisible (tbEditLabels);
     tbEditLabels.setButtonText ("Labels");
-    tbEditLabels.onClick = [this] () { editLabels(); };
+    tbEditLabels.onClick = [this]() { editLabels(); };
 
     addAndMakeVisible (tbEnableOSC);
     tbEnableOSC.setButtonText ("");
     tbEnableOSC.setTooltip ("Enables/disables OSC");
     tbEnableOSC.setToggleState (p.getOSCReceiver().getAutoConnect(), dontSendNotification);
-    tbEnableOSC.onClick = [&] ()
+    tbEnableOSC.onClick = [&]()
     {
         const auto enable = tbEnableOSC.getToggleState();
         p.getOSCReceiver().setAutoConnect (enable);
@@ -89,9 +91,10 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
     teOSCPort.setReadOnly (false);
     teOSCPort.setScrollbarsShown (true);
     teOSCPort.setJustification (Justification::centred);
-    teOSCPort.setTooltip ("The OSC port for receiving switch command. The command should be '/switch i', with i being the choice you want to play.");
+    teOSCPort.setTooltip (
+        "The OSC port for receiving switch command. The command should be '/switch i', with i being the choice you want to play.");
     teOSCPort.setText (String (p.getOSCReceiver().getPortNumber()), dontSendNotification);
-    teOSCPort.onReturnKey = [&] ()
+    teOSCPort.onReturnKey = [&]()
     {
         const int currentPort = teOSCPort.getText().getIntValue();
         p.getOSCReceiver().setPort (currentPort);
@@ -105,19 +108,20 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (Abcomparison
         auto handle = tbChoice.add (new TextButton);
         addAndMakeVisible (handle);
 
-        tbChoiceAttachments.add (new ButtonAttachment (parameters, "choiceState" + String (choice), *handle));
+        tbChoiceAttachments.add (
+            new ButtonAttachment (parameters, "choiceState" + String (choice), *handle));
         handle->setClickingTogglesState (true);
         handle->setColour (TextButton::buttonOnColourId, cols[choice % cols.size()]);
     }
 
     updateNumberOfButtons();
 
-
     // set the size of the GUI so the number of choices (nChoices) will fit in there
     {
         ScopedValueSetter<bool> preventEditorFromCallingProcessor (editorIsResizing, true, false);
         setResizeLimits (460, 300, 1440, 700);
-        setSize (jmin (processor.editorWidth.load(), 1440), jmin (processor.editorHeight.load(), 700));
+        setSize (jmin (processor.editorWidth.load(), 1440),
+                 jmin (processor.editorHeight.load(), 700));
     }
 
     updateLabelText();
@@ -139,7 +143,7 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
 
     const String title = "ABComparison";
 
-    Font font = Font (30.0f);
+    Font font = Font (FontOptions (30.0f));
     const float titleWidth = font.getStringWidth (title);
 
     auto bounds = getLocalBounds();
@@ -156,7 +160,7 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
     String versionString = "v";
     versionString.append (JucePlugin_VersionString, 6);
 
-    g.setFont (12.0f);
+    g.setFont (FontOptions (12.0f));
     g.drawFittedText (versionString, titleRow, Justification::topLeft, 1);
 
     auto headlineRow = bounds.removeFromTop (14);
@@ -164,7 +168,10 @@ void AbcomparisonAudioProcessorEditor::paint (Graphics& g)
 
     g.setFont (14.0f);
     g.drawText ("Choices", headlineRow.removeFromLeft (65), Justification::centred, 1);
-    g.drawText (CharPointer_UTF8 ("\xc3\xa0"), headlineRow.removeFromLeft (10), Justification::centred, 1);
+    g.drawText (CharPointer_UTF8 ("\xc3\xa0"),
+                headlineRow.removeFromLeft (10),
+                Justification::centred,
+                1);
     g.drawText ("Channels", headlineRow.removeFromLeft (75), Justification::centred, 1);
     headlineRow.removeFromLeft (10);
     g.drawText ("Switch mode", headlineRow.removeFromLeft (110), Justification::centred, 1);
@@ -205,10 +212,11 @@ void AbcomparisonAudioProcessorEditor::resized()
         processor.setEditorSize (getWidth(), getHeight());
 }
 
-bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress &key, Component *originatingComponent)
+bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress& key,
+                                                   Component* originatingComponent)
 {
     auto choice = key.getKeyCode() - 49;
-    if (choice == - 1)
+    if (choice == -1)
         choice = 9;
     if (choice >= 0 && choice < jmin (nChoices, 10))
         tbChoice.getUnchecked (choice)->triggerClick();
@@ -224,7 +232,8 @@ void AbcomparisonAudioProcessorEditor::updateNumberOfButtons()
     for (int choice = 0; choice < nChoices; ++choice)
     {
         tbChoice.getUnchecked (choice)->setVisible (true);
-        flexBox.items.add (FlexItem (size, size, *tbChoice.getUnchecked (choice)).withMargin ({10, 10, 10, 10}));
+        flexBox.items.add (
+            FlexItem (size, size, *tbChoice.getUnchecked (choice)).withMargin ({ 10, 10, 10, 10 }));
     }
 
     for (int choice = nChoices; choice < processor.maxNChoices; ++choice)
@@ -257,7 +266,7 @@ void AbcomparisonAudioProcessorEditor::timerCallback()
         updateButtonSize();
 }
 
-void AbcomparisonAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster *source)
+void AbcomparisonAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source)
 {
     if (processor.getOSCReceiver().getAutoConnect())
     {
@@ -267,18 +276,20 @@ void AbcomparisonAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster
             teOSCPort.setColour (TextEditor::outlineColourId, Colours::red);
     }
     else
-        teOSCPort.setColour (TextEditor::outlineColourId, getLookAndFeel().findColour (TextEditor::outlineColourId));
+        teOSCPort.setColour (TextEditor::outlineColourId,
+                             getLookAndFeel().findColour (TextEditor::outlineColourId));
 
     teOSCPort.repaint();
 }
-
 
 void AbcomparisonAudioProcessorEditor::editLabels()
 {
     auto settings = std::make_unique<SettingsComponent> (processor);
     settings->setSize (300, 250);
 
-    CallOutBox::launchAsynchronously (std::move (settings), tbEditLabels.getScreenBounds(), nullptr);
+    CallOutBox::launchAsynchronously (std::move (settings),
+                                      tbEditLabels.getScreenBounds(),
+                                      nullptr);
 }
 
 void AbcomparisonAudioProcessorEditor::updateLabelText()
