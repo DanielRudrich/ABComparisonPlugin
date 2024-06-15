@@ -7,10 +7,13 @@ set (CMAKE_CXX_STANDARD 17)
 
 add_subdirectory (JUCE)
 
+set (ABC_TARGETS Standalone) # add VST3 here if you want to build it
+
 if (DEFINED VST2PATH)
     juce_set_vst2_sdk_path (${VST2PATH})
+    list (APPEND ABC_TARGETS VST)
 else ()
-    message (FATAL_ERROR "You have to specify the VST2PATH variable with the path to the VST2 SDK")
+    message (WARNING "VST2PATH not defined, not building VST2 version.")
 endif ()
 
 juce_add_plugin (
@@ -23,8 +26,10 @@ juce_add_plugin (
     "Daniel Rudrich"
     PRODUCT_NAME
     "ABComparison"
+    BUNDLE_ID
+    "de.danielrudrich.ABComparison"
     FORMATS
-    VST
+    ${ABC_TARGETS}
     COPY_PLUGIN_AFTER_BUILD
     TRUE
 )
@@ -42,11 +47,7 @@ target_sources (
 )
 
 target_compile_definitions (
-    ABComparison
-    PUBLIC JUCE_WEB_BROWSER=0
-           JUCE_USE_CURL=0
-           JUCE_DISPLAY_SPLASH_SCREEN=0
-           JUCE_VST3_CAN_REPLACE_VST2=0
+    ABComparison PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
 target_link_libraries (ABComparison PRIVATE juce::juce_audio_utils juce::juce_osc)

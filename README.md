@@ -1,12 +1,12 @@
 # ABComparisonPlugin
-The ABComparison is a simple channel routing plug-in for AB-comparison tests. 
+The ABComparison is a simple channel routing plug-in for AB-comparison tests.
 
 As per default, the plug-in can switch between **10<sup>1</sup> different input streams** with configurable **channel width** (up to 32 channels). **Update:** plug-in now handles up to 32 input streams, however the joke in the footnotes wouldn't work anymore as there are only so many letters in the alphabet...
 
-There are **two switching modes**: the *exclusive solo* mode and *toggle mode*. The first one makes sure that only one choice is playing. 
+There are **two switching modes**: the *exclusive solo* mode and *toggle mode*. The first one makes sure that only one choice is playing.
 The **fade-time** can be set to values between 0ms and 1000ms.
 
-**New with version 1.3.0**: The button size and displayed text labels are now customizable! 
+**New with version 1.3.0**: The button size and displayed text labels are now customizable!
 
 **Even newer with version 1.4.0**: OSC Support see [below](#osc-support), thanks to [juhanipaasonen](https://github.com/juhanipaasonen)!
 
@@ -16,7 +16,7 @@ Binaries for windows and macOS are available here: [Releases](https://github.com
 ## Compile the plug-in yourself
 To build the ABComparison plug-in you need CMake and a build environment. This repository already comes with the JUCE framework.
 
-I recommend building the plug-in as a VST2 plug-in, the `CMakeLists.txt` is already configured for that. The only thing you need for that is the VST2 SDK. 
+I recommend building the plug-in as a VST2 plug-in, the `CMakeLists.txt` is already configured for that. The **only** thing you need for that is the VST2 SDK.
 ```sh
 mkdir build
 cd build
@@ -24,7 +24,8 @@ cmake .. -DCMAKE_BUILD_TYPE=Release -DVST2PATH="/path/to/VST2SDK"
 make
 ```
 
-If you don't have the VST2 SDK or can't get it, you still can build the plug-in as VST3: simply open the `CMakeLists.txt` and replace the `VST` with `VST3` within the `juce_add_plugin` call. However, VST3 has a little problem with so many channels. So in most DAWs you can only get 24 channels, instead of 64 like with VST...
+If you don't have the VST2 SDK or can't get it, you still can build the plug-in as VST3: simply open the `CMakeLists.txt` and append `VST3` to the `ABC_TARGETS` variable. However, VST3 doesn't support as many channels as VST2, so be aware of that when using the plug-in.
+
 ```sh
 mkdir build
 cd build
