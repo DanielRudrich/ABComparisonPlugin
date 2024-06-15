@@ -33,10 +33,10 @@ typedef AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 //==============================================================================
 /**
 */
-class AbcomparisonAudioProcessorEditor  : public AudioProcessorEditor,
-    public KeyListener,
-    private Timer,
-    public ChangeListener
+class AbcomparisonAudioProcessorEditor : public AudioProcessorEditor,
+                                         public KeyListener,
+                                         private Timer,
+                                         public ChangeListener
 {
 public:
     AbcomparisonAudioProcessorEditor (AbcomparisonAudioProcessor&, AudioProcessorValueTreeState&);
@@ -47,14 +47,14 @@ public:
     void resized() override;
     void updateNumberOfButtons();
 
-    bool keyPressed (const KeyPress &key, Component *originatingComponent) override;
+    bool keyPressed (const KeyPress& key, Component* originatingComponent) override;
     void timerCallback() override;
 
     void editLabels();
     void updateLabelText();
     void updateButtonSize();
 
-    void changeListenerCallback (ChangeBroadcaster *source) override;
+    void changeListenerCallback (ChangeBroadcaster* source) override;
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -69,9 +69,12 @@ private:
     ToggleButton tbEnableOSC;
     TextEditor teOSCPort;
 
+    ResizableCornerComponent resizer;
+
     int nChoices = 2;
 
-    std::unique_ptr<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment, cbNChoicesAttachment;
+    std::unique_ptr<ComboBoxAttachment> cbSwitchModeAttachment, cbChannelSizeAttachment,
+        cbNChoicesAttachment;
     std::unique_ptr<SliderAttachment> slFadeTimeAttachment;
 
     OwnedArray<TextButton> tbChoice;

@@ -27,7 +27,7 @@
 AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (
     AbcomparisonAudioProcessor& p,
     AudioProcessorValueTreeState& vts) :
-    AudioProcessorEditor (&p), processor (p), parameters (vts)
+    AudioProcessorEditor (&p), processor (p), parameters (vts), resizer (this, nullptr)
 {
     toolTipWin.setMillisecondsBeforeTipAppears (200);
     toolTipWin.setOpaque (false);
@@ -128,6 +128,8 @@ AbcomparisonAudioProcessorEditor::AbcomparisonAudioProcessorEditor (
     startTimer (50);
     processor.getOSCReceiver().addChangeListener (this);
     changeListenerCallback (nullptr);
+
+    addAndMakeVisible (resizer);
 }
 
 AbcomparisonAudioProcessorEditor::~AbcomparisonAudioProcessorEditor()
@@ -210,6 +212,10 @@ void AbcomparisonAudioProcessorEditor::resized()
 
     if (! editorIsResizing) // user is
         processor.setEditorSize (getWidth(), getHeight());
+
+    // conrner component
+    const auto cornerSize = 16;
+    resizer.setBounds (getLocalBounds().removeFromBottom (cornerSize).removeFromRight (cornerSize));
 }
 
 bool AbcomparisonAudioProcessorEditor::keyPressed (const KeyPress& key,
