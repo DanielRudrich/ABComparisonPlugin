@@ -7,13 +7,25 @@ set (CMAKE_CXX_STANDARD 17)
 
 add_subdirectory (JUCE)
 
-set (ABC_TARGETS Standalone) # add VST3 here if you want to build it
+# Can set plugin formats to build from cmake variable
+if(NOT DEFINED FORMATS)
+    set (FORMATS Standalone) # default format
+endif ()
 
 if (DEFINED VST2PATH)
     juce_set_vst2_sdk_path (${VST2PATH})
-    list (APPEND ABC_TARGETS VST)
+    if (NOT "VST" IN_LIST FORMATS)
+        list (APPEND FORMATS VST)
+    endif ()
 else ()
-    message (WARNING "VST2PATH not defined, not building VST2 version.")
+    list(REMOVE_ITEM FORMATS VST)
+    message (WARNING "VST2PATH not defined, not building VST2 plugin.")
+endif ()
+
+if (FORMATS)
+    message (WARNING "Plugin format(s) to build: ${FORMATS}")
+else ()
+    message (WARNING "No plugin to build; only shared code will be compiled.\nTo compile plugin(s): define FORMATS as a list:\nStandalone;VST;VST3;AU;AUv3;AAX;Unity;LV2")
 endif ()
 
 juce_add_plugin (
@@ -28,8 +40,10 @@ juce_add_plugin (
     "ABComparison"
     BUNDLE_ID
     "de.danielrudrich.ABComparison"
+    LV2URI
+    "https://danielrudrich.de/ABComparison"
     FORMATS
-    ${ABC_TARGETS}
+    ${FORMATS}
     COPY_PLUGIN_AFTER_BUILD
     TRUE
 )
